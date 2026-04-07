@@ -77,6 +77,12 @@ Most interview platforms force a choice between **live interaction** and **AI an
 <br /><b>Comprehensive Documentation</b>
 </td>
 </tr>
+<tr>
+<td align="center" colspan="2">
+<img src="Neeti%20.excalidraw%281%29.png" alt="System Blueprint (Excalidraw)" width="85%" />
+<br /><b>System Blueprint (Excalidraw)</b>
+</td>
+</tr>
 </table>
 
 ---
