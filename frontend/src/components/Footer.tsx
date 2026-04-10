@@ -7,7 +7,6 @@ import {
   Mail,
   ExternalLink,
   Shield,
-  Activity,
   ChevronRight,
 } from 'lucide-react';
 import { motion } from 'framer-motion';

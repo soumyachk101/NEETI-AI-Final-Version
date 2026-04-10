@@ -6,9 +6,9 @@ import { extractErrorMessage } from '../lib/errorUtils';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Logo } from '../components/Logo';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -16,7 +16,7 @@ const staggerContainer = {
   },
 };
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: { 
     opacity: 1, 

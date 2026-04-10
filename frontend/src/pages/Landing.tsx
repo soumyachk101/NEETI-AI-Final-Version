@@ -1,7 +1,5 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { TechnicalBlueprint } from '../components/TechnicalBlueprint';
-import { StatusIndicator } from '../components/StatusIndicator';
 import { ScrollReveal } from '../components/ScrollReveal';
 import {
   Terminal,
@@ -20,18 +18,11 @@ import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import { SplineScene } from "@/components/ui/splite";
 import { Card } from "@/components/ui/card";
 import { Spotlight } from "@/components/ui/spotlight";
-import { TechMarquee } from '@/components/ui/tech-marquee';
 import { TechOrbit } from '@/components/ui/tech-orbit';
 import { TextReveal } from '@/components/ui/text-reveal';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, type Variants } from 'framer-motion';
 
-const AGENTS = [
-  { name: 'Coding Agent', status: 'active' as const },
-  { name: 'Speech Agent', status: 'active' as const },
-  { name: 'Vision Agent', status: 'active' as const },
-  { name: 'Reasoning Agent', status: 'active' as const },
-  { name: 'Evaluation Agent', status: 'idle' as const },
-];
+
 
 const CAPABILITIES = [
   {
@@ -183,7 +174,7 @@ function CinematicOrbitSection() {
 }
 
 // Staggered grid container for capabilities/infrastructure cards
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -193,7 +184,7 @@ const staggerContainer = {
   },
 };
 
-const staggerItem = {
+const staggerItem: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: { 
     opacity: 1, 
@@ -319,7 +310,7 @@ export const Landing = () => {
                   whileInView="visible"
                   viewport={{ once: true, margin: "-10%" }}
                 >
-                  {CAPABILITIES.map((cap, i) => (
+                  {CAPABILITIES.map((cap) => (
                     <motion.div key={cap.tag} variants={staggerItem}>
                       <div
                         className="h-full bg-white/[0.03] border border-white/[0.05] rounded-2xl p-6 hover:bg-white/[0.08] hover:border-bronze/30 hover:-translate-y-2 transition-all duration-300 flex flex-col items-start group/card cursor-default shadow-lg"
