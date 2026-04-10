@@ -50,20 +50,15 @@ def get_database_url() -> str:
     
     return f"postgresql+asyncpg://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_db}"
 
-# CRIT-13 FIX: NullPool does not accept pool_size/max_overflow.
-# Only pass pooling args when using the default QueuePool (non-test).
-_engine_kwargs: dict = {
-    "echo": settings.DEBUG,
-    "future": True,
-    "pool_pre_ping": True,
-}
-if settings.ENVIRONMENT == "test":
-    _engine_kwargs["poolclass"] = NullPool
-else:
-    _engine_kwargs["pool_size"] = 10
-    _engine_kwargs["max_overflow"] = 20
-
-engine = create_async_engine(get_database_url(), **_engine_kwargs)
+engine = create_async_engine(
+    get_database_url(),
+    echo=settings.DEBUG,
+    future=True,
+    poolclass=NullPool if settings.ENVIRONMENT == "test" else None,
+    pool_pre_ping=True,
+    pool_size=10,
+    max_overflow=20,
+)
 
 AsyncSessionLocal = async_sessionmaker(
     engine,

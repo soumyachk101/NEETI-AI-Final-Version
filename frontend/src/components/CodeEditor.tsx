@@ -1,14 +1,17 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { codingApi } from '@/lib/api';
 import { Button } from './Button';
 import { Play, CheckCircle, XCircle, Terminal } from 'lucide-react';
+import { WebSocketMessage } from '@/lib/websocket';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface CodeEditorProps {
   sessionId: number;
   language: string;
   value: string;
   onChange: (value: string) => void;
+  lastMessage?: WebSocketMessage | null;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -16,11 +19,28 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   language,
   value,
   onChange,
+  lastMessage,
 }) => {
   const [isExecuting, setIsExecuting] = React.useState(false);
   const [output, setOutput] = React.useState('');
   const [error, setError] = React.useState('');
   const typingTimeout = useRef<number | undefined>(undefined);
+
+  const { user } = useAuthStore();
+  const isRecruiter = user?.role === 'recruiter';
+
+  useEffect(() => {
+    if (isRecruiter && lastMessage?.type === 'code_executed') {
+      if (lastMessage.data?.output !== undefined && lastMessage.data?.output !== null) {
+        setOutput(String(lastMessage.data.output));
+      }
+      if (lastMessage.data?.error !== undefined && lastMessage.data?.error !== null) {
+        setError(String(lastMessage.data.error));
+      } else {
+        setError('');
+      }
+    }
+  }, [lastMessage, isRecruiter]);
 
   const handleChange = useCallback(
     (newValue: string | undefined) => {

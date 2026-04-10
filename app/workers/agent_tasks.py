@@ -161,6 +161,8 @@ def process_evaluation_agent(self, session_id: int, data: dict[str, Any]) -> dic
     """Generate final evaluation from all agents."""
     import asyncio
     from app.models.models import Evaluation
+    from sqlalchemy import select
+    from app.models.models import AgentOutput as AgentOutputModel, AgentType
     
     async def _process():
         agent = EvaluationAgent()
@@ -180,6 +182,30 @@ def process_evaluation_agent(self, session_id: int, data: dict[str, Any]) -> dic
             )
             db.add(db_output)
             
+            # --- Extract anomaly data from coding agent output ---
+            anomaly_probability = None
+            anomaly_mode = None
+            anomaly_reasons = []
+            behavioral_features = {}
+            
+            try:
+                coding_result = await db.execute(
+                    select(AgentOutputModel).where(
+                        AgentOutputModel.session_id == session_id,
+                        AgentOutputModel.agent_type == AgentType.CODING,
+                        AgentOutputModel.status == "completed"
+                    ).order_by(AgentOutputModel.started_at.desc()).limit(1)
+                )
+                coding_output = coding_result.scalar_one_or_none()
+                if coding_output and coding_output.findings:
+                    findings = coding_output.findings
+                    anomaly_probability = findings.get("anomaly_probability")
+                    anomaly_mode = findings.get("anomaly_mode")
+                    anomaly_reasons = findings.get("anomaly_evidence", [])
+                    behavioral_features = findings.get("behavioral_features", {})
+            except Exception as e:
+                logger.warning(f"Failed to extract anomaly data for session {session_id}: {e}")
+            
             findings = output.findings
             evaluation = Evaluation(
                 session_id=session_id,
@@ -194,7 +220,12 @@ def process_evaluation_agent(self, session_id: int, data: dict[str, Any]) -> dic
                 weaknesses=[],
                 key_findings=output.flags,
                 summary=output.insights,
-                detailed_report=output.insights
+                detailed_report=output.insights,
+                # Phase 1: Anomaly detection results
+                anomaly_probability=anomaly_probability,
+                anomaly_mode=anomaly_mode,
+                anomaly_reasons=anomaly_reasons if anomaly_reasons else [],
+                behavioral_features=behavioral_features if behavioral_features else {},
             )
             db.add(evaluation)
             
@@ -211,10 +242,32 @@ def trigger_all_agents(self, session_id: int) -> None:
     """
     Trigger all agents to process a session.
     This is called when a session ends.
-    Uses a chord so the evaluation agent runs automatically
-    after all four analysis agents finish — no blocking get().
+    
+    Phase 3: Uses LangGraph when USE_LANGGRAPH=True (default).
+    Falls back to Celery chord when disabled.
     """
-    logger.info(f"Triggering all agents for session {session_id}")
+    from app.core.config import settings
+    
+    if settings.USE_LANGGRAPH:
+        logger.info(f"[LangGraph] Triggering evaluation pipeline for session {session_id}")
+        import asyncio
+        from app.agents.graph import run_evaluation_pipeline
+        
+        try:
+            asyncio.run(run_evaluation_pipeline(session_id))
+            logger.info(f"[LangGraph] Pipeline complete for session {session_id}")
+        except Exception as e:
+            logger.error(f"[LangGraph] Pipeline failed for session {session_id}: {e}")
+            # Fallback to legacy chord
+            logger.info(f"[LangGraph] Falling back to Celery chord for session {session_id}")
+            _trigger_chord_legacy(session_id)
+    else:
+        _trigger_chord_legacy(session_id)
+
+
+def _trigger_chord_legacy(session_id: int) -> None:
+    """Legacy Celery chord — kept as fallback."""
+    logger.info(f"Triggering all agents (chord) for session {session_id}")
     
     from celery import chord
     
@@ -228,4 +281,4 @@ def trigger_all_agents(self, session_id: int) -> None:
         process_evaluation_agent.si(session_id, {})
     ).apply_async()
     
-    logger.info(f"All agents dispatched for session {session_id}")
+    logger.info(f"All agents dispatched (chord) for session {session_id}")

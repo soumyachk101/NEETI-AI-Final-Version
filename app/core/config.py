@@ -104,7 +104,7 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: Optional[str] = None
     USE_OLLAMA: bool = False
     OLLAMA_BASE_URL: str = "http://localhost:11434"
-    OLLAMA_MODEL: str = "llama3"
+    OLLAMA_MODEL: str = "qwen2.5:7b"
     WHISPER_MODEL: str = "tiny"
     USE_LOCAL_WHISPER: bool = True
     
@@ -134,6 +134,9 @@ class Settings(BaseSettings):
     
     # Hackathon demo mode — enables mock data and relaxed validation
     DEMO_MODE: bool = False
+    
+    # Phase 3: LangGraph orchestration (feature flag)
+    USE_LANGGRAPH: bool = True
 
 @lru_cache()
 def get_settings() -> Settings:

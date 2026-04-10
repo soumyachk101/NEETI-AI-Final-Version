@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useRef, useState } from 'react';
+import { supabase } from './supabase';
 
 const WS_BASE_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
 
@@ -21,19 +22,12 @@ export function useWebSocket(sessionId: number | null) {
     const reconnectTimeoutRef = useRef<number | null>(null);
     const reconnectAttemptsRef = useRef(0);
 
-    const connect = useCallback(() => {
+    const connect = useCallback(async () => {
         if (!sessionId) return;
 
-        // CRIT-8 FIX: WebSocket connects with auth token
-        const token = localStorage.getItem('auth-storage');
-        let authToken = '';
-        try {
-            const parsed = JSON.parse(token || '{}');
-            // Token would be retrieved from Supabase session in production
-            authToken = parsed?.state?.accessToken || '';
-        } catch {
-            // Proceed without token for now
-        }
+        // CRIT-8 FIX: WebSocket connects with auth token from Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        const authToken = session?.access_token || '';
 
         const url = authToken
             ? `${WS_BASE_URL}/api/ws/session/${sessionId}?token=${authToken}`
@@ -129,10 +123,17 @@ export function useLiveMonitoring(sessionId: number | null) {
     const wsRef = useRef<WebSocket | null>(null);
     const pingIntervalRef = useRef<number | null>(null);
 
-    const connect = useCallback(() => {
+    const connect = useCallback(async () => {
         if (!sessionId) return;
 
-        const ws = new WebSocket(`${WS_BASE_URL}/api/ws/live/${sessionId}`);
+        const { data: { session } } = await supabase.auth.getSession();
+        const authToken = session?.access_token || '';
+
+        const url = authToken
+            ? `${WS_BASE_URL}/api/ws/live/${sessionId}?token=${authToken}`
+            : `${WS_BASE_URL}/api/ws/live/${sessionId}`;
+
+        const ws = new WebSocket(url);
 
         ws.onopen = () => {
             console.log('Live monitoring connected');

@@ -15,8 +15,8 @@ const apiClient: AxiosInstance = axios.create({
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (session?.access_token && config.headers) {
-      config.headers.Authorization = `Bearer ${session.access_token}`;
+    if (session?.access_token) {
+      config.headers.set('Authorization', `Bearer ${session.access_token}`);
     }
     return config;
   },

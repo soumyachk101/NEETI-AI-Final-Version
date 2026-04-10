@@ -11,17 +11,70 @@ import { LogOut, Code, Maximize2, Minimize2, FileText, Clock, AlertTriangle, Wif
 
 const LIVEKIT_WS_URL = import.meta.env.VITE_LIVEKIT_WS_URL;
 
+import { WebSocketMessage } from '../lib/websocket';
+import { useAuthStore } from '../store/useAuthStore';
+
+const InterviewTimer: React.FC = () => {
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setElapsedTime(p => p + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const fmt = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
+
+  return <span className="font-mono tabular-nums text-sm font-semibold text-ink-primary">{fmt(elapsedTime)}</span>;
+};
+
+const WorkspaceEditor: React.FC<{ sessionId: number; language: string; lastMessage: WebSocketMessage | null }> = ({ sessionId, language, lastMessage }) => {
+  const [currentCode, setCurrentCode] = useState('');
+  const { user } = useAuthStore();
+  const isRecruiter = user?.role === 'recruiter';
+
+  useEffect(() => {
+    if (isRecruiter && lastMessage) {
+      if (lastMessage.type === 'code_changed' || lastMessage.type === 'code_executed') {
+        if (lastMessage.data?.code) {
+          setCurrentCode(lastMessage.data.code as string);
+        }
+      }
+    }
+  }, [lastMessage, isRecruiter]);
+
+  const handleChange = (val: string) => {
+    setCurrentCode(val);
+  };
+
+  return (
+    <>
+      <div className="flex-1 p-3">
+        <CodeEditor value={currentCode} onChange={handleChange} language={language} sessionId={sessionId} lastMessage={lastMessage} />
+      </div>
+
+      <div className="border-t border-neeti-border bg-neeti-surface/60 px-4 py-2">
+        <div className="flex items-center gap-4 text-[10px] text-ink-ghost">
+          <span>Lines: <span className="font-mono text-ink-secondary">{currentCode.split('\n').length}</span></span>
+          <span>Lang: <span className="font-mono text-ink-secondary">{language.toUpperCase()}</span></span>
+          <span className="ml-auto">
+            <span className="w-1.5 h-1.5 rounded-full bg-status-success inline-block mr-1 align-middle animate-pulse-dot" />
+            AI Monitoring Active
+          </span>
+        </div>
+      </div>
+    </>
+  );
+};
+
 export const InterviewRoom: React.FC = () => {
   const navigate = useNavigate();
   const { currentSession, roomToken, fetchRoomToken } = useSessionStore();
   const { user } = useAuthStore();
   const isRecruiter = user?.role === 'recruiter';
-  const { isConnected } = useWebSocket(currentSession?.id || null);
+  const { isConnected, lastMessage } = useWebSocket(currentSession?.id || null);
 
   const [isCodeExpanded, setIsCodeExpanded] = useState(false);
-  const [currentCode, setCurrentCode] = useState('');
   const [language, setLanguage] = useState('typescript');
-  const [elapsedTime, setElapsedTime] = useState(0);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
 
   useEffect(() => {
@@ -30,13 +83,6 @@ export const InterviewRoom: React.FC = () => {
       fetchRoomToken(currentSession.id).catch(() => navigate('/dashboard'));
     }
   }, [currentSession, roomToken, navigate, fetchRoomToken]);
-
-  useEffect(() => {
-    const t = setInterval(() => setElapsedTime(p => p + 1), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const fmt = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
   if (!currentSession || !roomToken) {
     return (
@@ -77,7 +123,7 @@ export const InterviewRoom: React.FC = () => {
 
             <div className="flex items-center gap-1.5 text-xs text-ink-tertiary">
               <Clock className="w-3.5 h-3.5" />
-              <span className="font-mono tabular-nums text-sm font-semibold text-ink-primary">{fmt(elapsedTime)}</span>
+              <InterviewTimer />
             </div>
           </div>
 
@@ -156,20 +202,7 @@ export const InterviewRoom: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex-1 p-3">
-            <CodeEditor value={currentCode} onChange={setCurrentCode} language={language} sessionId={currentSession?.id || 0} />
-          </div>
-
-          <div className="border-t border-neeti-border bg-neeti-surface/60 px-4 py-2">
-            <div className="flex items-center gap-4 text-[10px] text-ink-ghost">
-              <span>Lines: <span className="font-mono text-ink-secondary">{currentCode.split('\n').length}</span></span>
-              <span>Lang: <span className="font-mono text-ink-secondary">{language.toUpperCase()}</span></span>
-              <span className="ml-auto">
-                <span className="w-1.5 h-1.5 rounded-full bg-status-success inline-block mr-1 align-middle animate-pulse-dot" />
-                AI Monitoring Active
-              </span>
-            </div>
-          </div>
+          <WorkspaceEditor sessionId={currentSession?.id || 0} language={language} lastMessage={lastMessage} />
         </div>
       </div>
 

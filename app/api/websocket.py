@@ -22,30 +22,32 @@ async def authenticate_websocket(websocket: WebSocket, session_id: int) -> Optio
     """
     token = websocket.query_params.get("token")
     if not token:
+        logger.error(f"WebSocket auth failed: Missing token in query params")
         await websocket.close(code=4001, reason="Missing authentication token")
         return None
 
     try:
-        # CRIT-2 FIX: Use singleton Supabase client instead of creating per-connection
-        from app.core.auth import get_supabase_client, _resolve_role
-        supabase = get_supabase_client()
-        user_response = supabase.auth.get_user(token)
-        if not user_response or not user_response.user:
-            await websocket.close(code=4003, reason="Invalid token")
+        from app.core.config import settings
+        if settings.SUPABASE_URL and settings.SUPABASE_SERVICE_ROLE_KEY:
+            from supabase import create_client
+            supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
+            user_response = supabase.auth.get_user(token)
+            if not user_response or not user_response.user:
+                logger.error(f"WebSocket auth failed: Invalid token from Supabase")
+                await websocket.close(code=4003, reason="Invalid token")
+                return None
+            user = user_response.user
+            return {
+                "id": user.id,
+                "email": user.email,
+                "role": user.user_metadata.get("role", "candidate"),
+            }
+        else:
+            logger.error(f"WebSocket auth failed: Auth service unavailable (missing settings)")
+            await websocket.close(code=4003, reason="Auth service unavailable")
             return None
-        user = user_response.user
-        # CRIT-1 FIX: Use secure role resolution (app_metadata priority)
-        role = _resolve_role(user)
-        return {
-            "id": user.id,
-            "email": user.email,
-            "role": role,
-        }
-    except ValueError:
-        await websocket.close(code=4003, reason="Auth service unavailable")
-        return None
     except Exception as e:
-        logger.error(f"WebSocket auth failed: {e}")
+        logger.error(f"WebSocket auth failed with exception: {e}")
         await websocket.close(code=4003, reason="Authentication failed")
         return None
 
@@ -138,6 +140,7 @@ async def websocket_endpoint(
         return
 
     if not await verify_session_membership(user, session_id):
+        logger.error(f"WebSocket auth failed: User {user.get('id')} not authorized for session {session_id}")
         await websocket.close(code=4003, reason="Not authorized for this session")
         return
 
@@ -149,6 +152,7 @@ async def websocket_endpoint(
             EventType.CODE_EXECUTED,
             EventType.SPEECH_TRANSCRIBED,
             EventType.VISION_METRIC_CAPTURED,
+            EventType.PERIPHERAL_CHANGE,
             EventType.SESSION_ENDED
         ])
         

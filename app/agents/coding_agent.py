@@ -1,6 +1,6 @@
 """
 Coding Agent - Analyzes coding behavior and problem-solving skills.
-Uses: AI Service (OpenAI/Ollama).
+Uses: AI Service (OpenAI/Ollama), Feature Store, Anomaly Detection.
 """
 from typing import Any
 from sqlalchemy import select
@@ -11,6 +11,8 @@ from app.models.models import CodingEvent
 from app.core.database import AsyncSessionLocal
 from app.core.logging import logger
 from app.services.ai_service import ai_service
+from app.services.feature_store import feature_store
+from app.services.anomaly_service import anomaly_service
 
 class CodingAgent(BaseAgent):
     """
@@ -44,6 +46,7 @@ class CodingAgent(BaseAgent):
                 insights="No coding activity detected"
             )
         
+        # Existing heuristic metrics
         metrics = self._analyze_events(events)
         
         weights = {
@@ -54,7 +57,24 @@ class CodingAgent(BaseAgent):
         }
         score = self.calculate_score(metrics, weights)
         
-        flags = self._extract_flags(events, metrics)
+        # --- Phase 1: Behavioral anomaly detection ---
+        anomaly_result = None
+        try:
+            anomaly_result = await anomaly_service.analyze(session_id, events)
+            metrics["anomaly_probability"] = anomaly_result.probability
+            metrics["anomaly_mode"] = anomaly_result.mode
+            metrics["anomaly_evidence"] = anomaly_result.evidence
+            metrics["behavioral_features"] = anomaly_result.feature_snapshot
+            logger.info(
+                f"Anomaly analysis for session {session_id}: "
+                f"probability={anomaly_result.probability:.2f} "
+                f"mode={anomaly_result.mode} "
+                f"rules_triggered={len(anomaly_result.triggered_rules)}"
+            )
+        except Exception as e:
+            logger.warning(f"Anomaly detection failed for session {session_id}: {e}")
+        
+        flags = self._extract_flags(events, metrics, anomaly_result)
         
         insights = await self._generate_insights(metrics, flags)
         
@@ -153,9 +173,10 @@ class CodingAgent(BaseAgent):
     def _extract_flags(
         self,
         events: list[CodingEvent],
-        metrics: dict[str, float]
+        metrics: dict[str, float],
+        anomaly_result=None
     ) -> list[dict[str, Any]]:
-        """Extract concerning patterns."""
+        """Extract concerning patterns, including anomaly-driven flags."""
         flags = []
         
         if metrics["execution_success_rate"] < 30:
@@ -171,6 +192,27 @@ class CodingAgent(BaseAgent):
                 "severity": "medium",
                 "message": "Minimal coding activity detected"
             })
+        
+        # --- Phase 1: Anomaly-driven flags ---
+        if anomaly_result:
+            for rule in anomaly_result.triggered_rules:
+                flags.append({
+                    "type": f"anomaly_{rule.get('rule_id', 'unknown')}",
+                    "severity": rule.get("severity", "medium").lower(),
+                    "message": rule.get("evidence", rule.get("description", "Anomaly detected")),
+                    "rule_id": rule.get("rule_id"),
+                })
+            
+            # Add a summary flag if probability is high
+            if anomaly_result.probability >= 0.6:
+                flags.append({
+                    "type": "high_anomaly_probability",
+                    "severity": "critical",
+                    "message": (
+                        f"Behavioral anomaly probability: {anomaly_result.probability:.0%} "
+                        f"({anomaly_result.mode})"
+                    ),
+                })
         
         return flags
     

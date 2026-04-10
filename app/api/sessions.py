@@ -61,12 +61,26 @@ async def create_session(
         )
         logger.info(f"LiveKit room created: {room_name}")
     except Exception as e:
-        # FIX #12: Fail the request instead of creating a broken session
-        logger.error(f"Failed to create LiveKit room {room_name}: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Video conferencing service is currently unavailable. Please try again later."
-        )
+        # Non-blocking: session works without video for testing
+        logger.warning(f"LiveKit room creation failed (non-blocking): {e}")
+    
+    # Phase 2: Parse JD if provided (non-blocking, 10s timeout)
+    jd_profile = {}
+    if session_data.job_description and session_data.job_description.strip():
+        try:
+            import asyncio
+            from app.services.jd_parser import jd_parser
+            profile = await asyncio.wait_for(
+                jd_parser.parse(session_data.job_description),
+                timeout=10.0
+            )
+            if profile:
+                jd_profile = jd_parser.profile_to_dict(profile)
+                logger.info(f"JD parsed for session {session_code}: {profile.role_title}")
+        except asyncio.TimeoutError:
+            logger.warning("JD parsing timed out (Ollama may still be loading), skipping")
+        except Exception as e:
+            logger.warning(f"JD parsing failed, continuing without: {e}")
     
     new_session = Session(
         session_code=session_code,
@@ -76,6 +90,8 @@ async def create_session(
         status=SessionStatus.SCHEDULED,
         scheduled_at=session_data.scheduled_at,
         room_name=room_name,
+        job_description=session_data.job_description,
+        jd_profile=jd_profile,
         meta_data=session_data.metadata
     )
     

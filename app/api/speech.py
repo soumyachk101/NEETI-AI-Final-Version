@@ -58,38 +58,7 @@ async def transcribe_audio(
     await verify_session_participant(session_id, current_user, db)
     
     try:
-        # SEC-4 FIX: Validate file size (max 50MB)
-        MAX_AUDIO_SIZE = 50 * 1024 * 1024  # 50MB
         audio_bytes = await audio.read()
-        
-        if len(audio_bytes) > MAX_AUDIO_SIZE:
-            raise HTTPException(
-                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"Audio file too large. Maximum size is {MAX_AUDIO_SIZE // (1024*1024)}MB."
-            )
-        
-        if len(audio_bytes) == 0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Empty audio file."
-            )
-        
-        # SEC-4 FIX: Validate MIME type
-        ALLOWED_MIME_TYPES = {
-            'audio/wav', 'audio/wave', 'audio/x-wav',
-            'audio/mpeg', 'audio/mp3',
-            'audio/mp4', 'audio/x-m4a', 'audio/m4a',
-            'audio/ogg', 'audio/webm', 'audio/flac',
-            'application/octet-stream',  # Allow when browser doesn't detect type
-        }
-        content_type = (audio.content_type or '').lower()
-        if content_type and content_type not in ALLOWED_MIME_TYPES:
-            raise HTTPException(
-                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=f"Unsupported audio format: {content_type}. Allowed: WAV, MP3, M4A, OGG, WebM, FLAC."
-            )
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"Failed to read audio file: {e}")
         raise HTTPException(

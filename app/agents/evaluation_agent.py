@@ -1,12 +1,13 @@
 """
 Evaluation Agent - Combines all agent outputs into final recommendation.
+JD-aware: anchors evaluation to the specific role when a JD profile is available.
 """
-from typing import Any
+from typing import Any, Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents.base import BaseAgent, AgentInput, AgentOutput
-from app.models.models import AgentOutput as AgentOutputModel, AgentType
+from app.models.models import AgentOutput as AgentOutputModel, AgentType, Session
 from app.core.database import AsyncSessionLocal
 from app.core.logging import logger
 from app.services.ai_service import ai_service
@@ -15,8 +16,9 @@ class EvaluationAgent(BaseAgent):
     """
     Final evaluation agent that:
     - Aggregates all agent outputs
+    - Loads JD profile for role-aware evaluation
     - Produces overall hiring recommendation
-    - Generates structured report
+    - Generates structured report with skill gap analysis
     """
     
     def get_name(self) -> str:
@@ -26,6 +28,7 @@ class EvaluationAgent(BaseAgent):
         """Generate final evaluation from all agent outputs."""
         session_id = input_data.session_id
         
+        # Load agent outputs
         async with AsyncSessionLocal() as db:
             result = await db.execute(
                 select(AgentOutputModel)
@@ -35,6 +38,9 @@ class EvaluationAgent(BaseAgent):
                 )
             )
             agent_outputs = result.scalars().all()
+            
+            # Phase 2: Load JD profile from session
+            jd_profile = await self._load_jd_profile(db, session_id)
         
         if not agent_outputs:
             return AgentOutput(
@@ -46,11 +52,17 @@ class EvaluationAgent(BaseAgent):
         
         evaluation = self._aggregate_outputs(agent_outputs)
         
-        recommendation = self._generate_recommendation(evaluation)
+        recommendation = self._generate_recommendation(evaluation, jd_profile)
         
         findings = self._extract_key_findings(agent_outputs, evaluation)
         
-        insights = await self._generate_comprehensive_insights(evaluation, recommendation, agent_outputs)
+        insights = await self._generate_comprehensive_insights(
+            evaluation, recommendation, agent_outputs, jd_profile
+        )
+        
+        # Add JD profile to evaluation findings for downstream use
+        if jd_profile:
+            evaluation["jd_profile"] = jd_profile
         
         return AgentOutput(
             agent_type=self.agent_type,
@@ -60,6 +72,25 @@ class EvaluationAgent(BaseAgent):
             flags=findings["flags"],
             insights=insights
         )
+    
+    async def _load_jd_profile(
+        self, db: AsyncSession, session_id: int
+    ) -> Optional[dict[str, Any]]:
+        """Load JD profile from the session record."""
+        try:
+            result = await db.execute(
+                select(Session.jd_profile).where(Session.id == session_id)
+            )
+            profile = result.scalar_one_or_none()
+            if profile and isinstance(profile, dict) and profile.get("role_title"):
+                logger.info(
+                    f"JD profile loaded for session {session_id}: "
+                    f"{profile.get('role_title')}"
+                )
+                return profile
+        except Exception as e:
+            logger.warning(f"Failed to load JD profile for session {session_id}: {e}")
+        return None
     
     def _aggregate_outputs(
         self,
@@ -99,22 +130,37 @@ class EvaluationAgent(BaseAgent):
             "agent_count": len(agent_outputs)
         }
     
-    def _generate_recommendation(self, evaluation: dict[str, Any]) -> dict[str, Any]:
-        """Generate hiring recommendation based on overall score."""
+    def _generate_recommendation(
+        self,
+        evaluation: dict[str, Any],
+        jd_profile: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
+        """Generate hiring recommendation — JD-aware when profile available."""
         score = evaluation["overall_score"]
         
-        if score >= 75:
+        # Phase 2: Use seniority-specific thresholds if JD profile exists
+        hire_threshold = 75.0
+        maybe_threshold = 60.0
+        role_context = ""
+        
+        if jd_profile:
+            thresholds = jd_profile.get("seniority_thresholds", {})
+            hire_threshold = thresholds.get("min_score_for_hire", 75.0)
+            maybe_threshold = hire_threshold - 15.0
+            role_context = f" for {jd_profile.get('role_title', 'this role')}"
+        
+        if score >= hire_threshold:
             recommendation = "hire"
             confidence = 0.9
-            reasoning = "Candidate demonstrates strong technical and communication skills."
-        elif score >= 60:
+            reasoning = f"Candidate meets the performance bar{role_context}."
+        elif score >= maybe_threshold:
             recommendation = "maybe"
             confidence = 0.7
-            reasoning = "Candidate shows potential but has areas for improvement."
+            reasoning = f"Candidate shows potential but has gaps{role_context}."
         else:
             recommendation = "no_hire"
             confidence = 0.85
-            reasoning = "Candidate does not meet minimum requirements at this time."
+            reasoning = f"Candidate does not meet requirements{role_context}."
         
         return {
             "recommendation": recommendation,
@@ -160,6 +206,7 @@ class EvaluationAgent(BaseAgent):
         evaluation: dict[str, Any],
         recommendation: dict[str, Any],
         agent_outputs: list[AgentOutputModel],
+        jd_profile: Optional[dict[str, Any]] = None,
     ) -> str:
         """Generate comprehensive natural language insights using AI."""
         
@@ -169,8 +216,32 @@ class EvaluationAgent(BaseAgent):
                 f"- {output.agent_type.value}: score={output.score}, insights={output.insights}"
             )
         
+        # Phase 2: Build JD context block
+        jd_context = ""
+        if jd_profile:
+            jd_parts = [f"\n--- ROLE CONTEXT ---"]
+            jd_parts.append(f"Position: {jd_profile.get('role_title', 'Unknown')}")
+            jd_parts.append(f"Seniority: {jd_profile.get('seniority', 'mid').upper()}")
+            
+            required = jd_profile.get("required_skills", [])
+            if required:
+                jd_parts.append(f"Required Skills: {', '.join(required[:10])}")
+            
+            responsibilities = jd_profile.get("key_responsibilities", [])
+            if responsibilities:
+                jd_parts.append("Key Responsibilities:")
+                for r in responsibilities[:3]:
+                    jd_parts.append(f"  - {r}")
+            
+            focus = jd_profile.get("evaluation_focus", "")
+            if focus:
+                jd_parts.append(f"Evaluation Focus: {focus}")
+            
+            jd_parts.append("--- END ROLE CONTEXT ---\n")
+            jd_context = "\n".join(jd_parts)
+        
         prompt = f"""Generate a comprehensive interview evaluation report.
-
+{jd_context}
 Overall Score: {evaluation['overall_score']:.1f}/100
 Recommendation: {recommendation['recommendation'].upper()}
 Confidence: {recommendation['confidence']:.0%}
@@ -184,11 +255,13 @@ Scores:
 Agent Analyses:
 {chr(10).join(agent_summaries)}
 
+{"Evaluate this candidate SPECIFICALLY against the role requirements listed above. Identify skill gaps between what the role requires and what the candidate demonstrated." if jd_profile else ""}
 Write a 4-6 sentence professional evaluation summary covering strengths, weaknesses, and the hiring recommendation with reasoning."""
         
         system_prompt = (
             "You are a senior technical hiring manager writing a final evaluation report. "
-            "Be professional, balanced, and data-driven."
+            "Be professional, balanced, and data-driven. "
+            "When role context is provided, anchor your evaluation to that specific position."
         )
         
         try:
@@ -196,7 +269,7 @@ Write a 4-6 sentence professional evaluation summary covering strengths, weaknes
                 prompt=prompt,
                 system_prompt=system_prompt,
                 temperature=0.3,
-                max_tokens=400,
+                max_tokens=500,
             )).strip()
         except Exception as e:
             logger.warning(f"AI insights failed for evaluation agent: {e}")
@@ -206,3 +279,4 @@ Write a 4-6 sentence professional evaluation summary covering strengths, weaknes
                 recommendation["reasoning"],
             ]
             return " ".join(parts)
+

@@ -17,11 +17,14 @@ const AI_AGENTS = [
 export const SessionDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { currentSession, fetchSession, startSession, endSession, isLoading } = useSessionStore();
+  const { currentSession, fetchSession, startSession, endSession, isLoading, error } = useSessionStore();
   const [copied, setCopied] = useState(false);
   const [showEndDialog, setShowEndDialog] = useState(false);
 
-  useEffect(() => { if (id) fetchSession(Number(id)); }, [id, fetchSession]);
+  useEffect(() => { 
+    const numId = Number(id);
+    if (id && !isNaN(numId)) fetchSession(numId); 
+  }, [id, fetchSession]);
 
   const copyCode = () => {
     if (!currentSession) return;
@@ -36,10 +39,30 @@ export const SessionDetail: React.FC = () => {
     if (currentSession) try { await endSession(currentSession.id); setShowEndDialog(false); navigate('/dashboard'); } catch (e) { console.error('Failed to end session:', e); }
   };
 
-  if (!currentSession) {
+  if (isLoading && !currentSession) {
     return (
       <div className="min-h-screen bg-neeti-bg flex items-center justify-center">
         <p className="text-ink-ghost text-sm">Loading session…</p>
+      </div>
+    );
+  }
+
+  if (error || !currentSession) {
+    return (
+      <div className="min-h-screen bg-neeti-bg flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <p className="text-status-critical text-sm">{error || 'Session not found'}</p>
+          <div className="flex gap-3 justify-center">
+            <Button variant="secondary" size="sm" onClick={() => navigate('/dashboard')}>
+              Back to Dashboard
+            </Button>
+            {id && !isNaN(Number(id)) && (
+              <Button variant="primary" size="sm" onClick={() => fetchSession(Number(id))}>
+                Retry
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
     );
   }

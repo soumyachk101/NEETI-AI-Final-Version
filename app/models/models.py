@@ -83,7 +83,7 @@ class Session(Base):
     description = Column(Text, nullable=True)
     
     recruiter_id = Column(String(255), nullable=False, index=True)
-    status = Column(Enum(SessionStatus), default=SessionStatus.SCHEDULED, index=True)
+    status = Column(Enum(SessionStatus, values_callable=lambda x: [e.value for e in x]), default=SessionStatus.SCHEDULED, index=True)
     
     scheduled_at = Column(DateTime(timezone=True), nullable=True)
     started_at = Column(DateTime(timezone=True), nullable=True)
@@ -97,6 +97,10 @@ class Session(Base):
     recording_url = Column(Text, nullable=True)
     recording_started_at = Column(DateTime(timezone=True), nullable=True)
     
+    # Phase 2: JD-Anchored Evaluation
+    job_description = Column(Text, nullable=True)
+    jd_profile = Column(JSON, default=dict)           # Parsed role profile from JD
+    
     meta_data = Column(JSON, default=dict)
     
     candidates = relationship("Candidate", back_populates="session", cascade="all, delete-orphan")
@@ -105,6 +109,7 @@ class Session(Base):
     vision_metrics = relationship("VisionMetric", back_populates="session", cascade="all, delete-orphan")
     agent_outputs = relationship("AgentOutput", back_populates="session", cascade="all, delete-orphan")
     evaluations = relationship("Evaluation", back_populates="session", cascade="all, delete-orphan")
+    peripheral_events = relationship("PeripheralEvent", back_populates="session", cascade="all, delete-orphan")
     
     __table_args__ = (
         Index("idx_session_status_recruiter", "status", "recruiter_id"),
@@ -218,7 +223,7 @@ class AgentOutput(Base):
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(Integer, ForeignKey("sessions.id"), nullable=False)
     
-    agent_type = Column(Enum(AgentType), nullable=False, index=True)
+    agent_type = Column(Enum(AgentType, values_callable=lambda x: [e.value for e in x]), nullable=False, index=True)
     
     started_at = Column(DateTime(timezone=True), server_default=func.now())
     completed_at = Column(DateTime(timezone=True), nullable=True)
@@ -263,9 +268,55 @@ class Evaluation(Base):
     evaluated_at = Column(DateTime(timezone=True), server_default=func.now())
     evaluated_by_agent_version = Column(String(50), nullable=True)
     
+    # Anomaly detection results (Phase 1)
+    anomaly_probability = Column(Float, nullable=True)       # 0.0 - 1.0 calibrated
+    anomaly_mode = Column(String(50), nullable=True)         # "rule_based" | "ml_ensemble"
+    anomaly_reasons = Column(JSON, default=list)             # Human-readable evidence strings
+    behavioral_features = Column(JSON, default=dict)         # Feature snapshot for audit
+    
     session = relationship("Session", back_populates="evaluations")
     
     __table_args__ = (
         Index("idx_evaluation_recommendation", "recommendation"),
         Index("idx_evaluation_score", "overall_score"),
+    )
+
+class PeripheralEvent(Base):
+    """
+    Peripheral device tracking events.
+    Captures device inventory snapshots and real-time change alerts
+    as part of the anti-cheat monitoring pipeline.
+    """
+    __tablename__ = "peripheral_events"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(Integer, ForeignKey("sessions.id"), nullable=False)
+    
+    timestamp = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+    event_type = Column(String(50), nullable=False)  # "snapshot" | "device_added" | "device_removed" | "screen_change"
+    
+    # Full device inventory at the time of this event
+    device_snapshot = Column(JSON, default=dict)  # {cameras: [], microphones: [], speakers: [], screens: int}
+    
+    # What changed (for change events only)
+    device_changes = Column(JSON, default=dict)  # {added: [...], removed: [...], change_type: "..."}
+    
+    # Alert metadata
+    alert_severity = Column(String(20), nullable=True)   # "low" | "medium" | "high" | "critical"
+    alert_message = Column(Text, nullable=True)           # Human-readable description
+    
+    # Device counts at this point in time
+    camera_count = Column(Integer, default=0)
+    microphone_count = Column(Integer, default=0)
+    speaker_count = Column(Integer, default=0)
+    screen_count = Column(Integer, default=1)
+    
+    meta_data = Column(JSON, default=dict)
+    
+    session = relationship("Session", back_populates="peripheral_events")
+    
+    __table_args__ = (
+        Index("idx_peripheral_session_timestamp", "session_id", "timestamp"),
+        Index("idx_peripheral_event_type", "event_type"),
+        Index("idx_peripheral_severity", "alert_severity"),
     )

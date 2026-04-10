@@ -31,6 +31,9 @@ class EventType(str, Enum):
     
     VISION_METRIC_CAPTURED = "vision.metric_captured"
     
+    PERIPHERAL_SNAPSHOT = "peripheral.snapshot"
+    PERIPHERAL_CHANGE = "peripheral.change"
+    
     AGENT_PROCESSING_STARTED = "agent.processing_started"
     AGENT_PROCESSING_COMPLETED = "agent.processing_completed"
     AGENT_PROCESSING_FAILED = "agent.processing_failed"
@@ -176,5 +179,23 @@ async def publish_code_executed(session_id: int, result: dict[str, Any] = None, 
         event_type=EventType.CODE_EXECUTED,
         session_id=session_id,
         data=event_data
+    )
+    await EventPublisher.publish(event)
+
+async def publish_peripheral_snapshot(session_id: int, data: dict[str, Any]) -> None:
+    """Publish peripheral device snapshot event (initial inventory)."""
+    event = Event(
+        event_type=EventType.PERIPHERAL_SNAPSHOT,
+        session_id=session_id,
+        data=data
+    )
+    await EventPublisher.publish(event)
+
+async def publish_peripheral_change(session_id: int, data: dict[str, Any]) -> None:
+    """Publish peripheral device change event (device added/removed)."""
+    event = Event(
+        event_type=EventType.PERIPHERAL_CHANGE,
+        session_id=session_id,
+        data=data
     )
     await EventPublisher.publish(event)

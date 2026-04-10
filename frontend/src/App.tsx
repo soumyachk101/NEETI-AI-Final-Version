@@ -148,8 +148,8 @@ function App() {
               <Route path="/cookies" element={<Cookies />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              {/* Removed duplicate /sessions/join — canonical path is /join */}
               <Route path="/join" element={<SessionJoin />} />
+              <Route path="/sessions/join" element={<SessionJoin />} />
               <Route path="/interview" element={<ProtectedRoute><InterviewRoom /></ProtectedRoute>} />
               <Route path="/sessions/:id/interview" element={<ProtectedRoute><InterviewRoom /></ProtectedRoute>} />
               <Route

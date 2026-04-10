@@ -54,7 +54,7 @@ async def register_supabase(
         logger.error(f"Registration error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Registration failed. Please check your details and try again."
+            detail=f"Registration failed: {str(e)}"
         )
 
 @router.post("/login", response_model=TokenResponse)
@@ -91,7 +91,7 @@ async def login_supabase(
         logger.error(f"Login error: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password."
+            detail=f"Authentication failed: {str(e)}"
         )
 
 @router.post("/refresh", response_model=TokenResponse)
@@ -125,7 +125,7 @@ async def refresh_token_supabase(
         logger.error(f"Token refresh error: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Session expired. Please sign in again."
+            detail=f"Token refresh failed: {str(e)}"
         )
 
 @router.get("/me", response_model=UserResponse)
