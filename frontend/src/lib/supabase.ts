@@ -14,3 +14,5 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         detectSessionInUrl: true,
     },
 });
+
+// Synced for GitHub timestamp

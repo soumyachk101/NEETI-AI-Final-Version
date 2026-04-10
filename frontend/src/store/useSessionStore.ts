@@ -153,3 +153,5 @@ export const useSessionStore = create<SessionState>((set) => ({
 
   clearError: () => set({ error: null }),
 }));
+
+// Synced for GitHub timestamp

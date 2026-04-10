@@ -233,3 +233,5 @@ async def get_coding_events(
     events = result.scalars().all()
     
     return events
+
+# Synced for GitHub timestamp

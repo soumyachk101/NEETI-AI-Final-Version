@@ -303,3 +303,5 @@ export const FAQ = () => {
 };
 
 export default FAQ;
+
+// Synced for GitHub timestamp

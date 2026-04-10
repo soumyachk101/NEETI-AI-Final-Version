@@ -226,3 +226,5 @@ async def live_monitoring_endpoint(
     except Exception as e:
         logger.error(f"Live monitoring WebSocket error: {e}")
         manager.disconnect(websocket, session_id)
+
+# Synced for GitHub timestamp

@@ -114,3 +114,5 @@ async def get_current_candidate(
             detail="Candidate access required"
         )
     return current_user
+
+# Synced for GitHub timestamp

@@ -93,3 +93,5 @@ redis_client = RedisClient()
 async def get_redis() -> Redis:
     """Dependency for getting Redis client."""
     return redis_client.client
+
+# Synced for GitHub timestamp

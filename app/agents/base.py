@@ -128,3 +128,5 @@ class BaseAgent(ABC):
             return 0.0
         
         return min(100.0, max(0.0, total_score / total_weight))
+
+# Synced for GitHub timestamp

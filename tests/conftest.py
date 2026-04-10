@@ -128,3 +128,5 @@ async def admin_headers(test_admin: User) -> dict:
     """Create authorization headers for admin user."""
     token = AuthService.create_access_token(test_admin.id, test_admin.email)
     return {"Authorization": f"Bearer {token}"}
+
+# Synced for GitHub timestamp

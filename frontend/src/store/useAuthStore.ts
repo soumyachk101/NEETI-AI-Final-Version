@@ -201,3 +201,5 @@ const { data: { subscription: _authSubscription } } = supabase.auth.onAuthStateC
 
 // Export for manual cleanup if needed (e.g., in tests)
 export const cleanupAuthSubscription = () => _authSubscription.unsubscribe();
+
+// Synced for GitHub timestamp

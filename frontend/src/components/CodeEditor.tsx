@@ -171,3 +171,5 @@ function getMonacoLanguage(lang: string): string {
   };
   return map[lang] || 'typescript';
 }
+
+// Synced for GitHub timestamp

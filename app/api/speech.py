@@ -158,3 +158,5 @@ async def get_speech_status() -> dict:
         status_info["model"] = "whisper-1"
     
     return status_info
+
+# Synced for GitHub timestamp
