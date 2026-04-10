@@ -57,3 +57,5 @@ When behavior changes, update docs in this order:
 4. Architecture and summary docs
 
 Last updated: 2026-04-07
+
+ 

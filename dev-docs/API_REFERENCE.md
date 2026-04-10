@@ -215,3 +215,5 @@ Invoke-WebRequest -UseBasicParsing http://localhost:8000/api/info
 If browser shows CORS `status: null`, verify API reachability before CORS debugging.
 
 Last updated: 2026-04-07
+
+ 

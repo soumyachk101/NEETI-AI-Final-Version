@@ -7,3 +7,5 @@ cmds = ["pip install -r requirements.txt"]
 [start]
 # CRIT-14 FIX: Use Railway's dynamic $PORT variable instead of hardcoded 8000
 cmd = "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+
+ 

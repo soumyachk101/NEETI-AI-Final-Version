@@ -37,3 +37,5 @@ celery_app.conf.task_routes = {
 logger.info("Celery app configured")
 
 # Synced for GitHub timestamp
+
+ 

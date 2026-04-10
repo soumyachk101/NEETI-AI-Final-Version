@@ -99,3 +99,5 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
 export default ScrollReveal;
 
 // Synced for GitHub timestamp
+
+ 

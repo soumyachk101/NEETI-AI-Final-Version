@@ -79,3 +79,5 @@ services:
         fromService:
           name: neeti-ai-backend
           envVarKey: DATABASE_URL
+
+ 

@@ -198,3 +198,5 @@ volumes:
   redis_data:
   minio_data:
   ollama_data:
+
+ 

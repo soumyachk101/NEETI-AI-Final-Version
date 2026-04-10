@@ -106,3 +106,5 @@ docker-compose down -v     # stop + delete volumes (full reset)
 ---
 
 For the full setup guide with all options (Ollama, Judge0 self-hosting, production deployment), see [dev-docs/END_TO_END_SETUP.md](dev-docs/END_TO_END_SETUP.md).
+
+ 

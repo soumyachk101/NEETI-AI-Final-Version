@@ -6,3 +6,5 @@
     { "source": "/((?!api|ws).*)", "destination": "/index.html" }
   ]
 }
+
+ 

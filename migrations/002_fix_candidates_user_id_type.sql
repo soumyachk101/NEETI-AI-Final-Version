@@ -4,3 +4,5 @@
 
 ALTER TABLE candidates DROP CONSTRAINT IF EXISTS candidates_user_id_fkey;
 ALTER TABLE candidates ALTER COLUMN user_id TYPE VARCHAR(255) USING user_id::VARCHAR;
+
+ 
