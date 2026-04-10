@@ -30,10 +30,10 @@ export const SessionDetail: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleStart = async () => { if (currentSession) try { await startSession(currentSession.id); } catch {} };
+  const handleStart = async () => { if (currentSession) try { await startSession(currentSession.id); } catch (e) { console.error('Failed to start session:', e); } };
 
   const confirmEnd = async () => {
-    if (currentSession) try { await endSession(currentSession.id); setShowEndDialog(false); navigate('/dashboard'); } catch {}
+    if (currentSession) try { await endSession(currentSession.id); setShowEndDialog(false); navigate('/dashboard'); } catch (e) { console.error('Failed to end session:', e); }
   };
 
   if (!currentSession) {
@@ -56,7 +56,7 @@ export const SessionDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neeti-bg relative overflow-hidden">
-      <div className="ambient-orb ambient-orb-bronze w-[450px] h-[450px] top-[-10%] left-[20%] z-0 opacity-50" />
+      <div className="ambient-orb ambient-orb-primary w-[450px] h-[450px] top-[-10%] left-[20%] z-0 opacity-50" />
       <div className="ambient-orb ambient-orb-blue w-[350px] h-[350px] bottom-[15%] right-[-3%] z-0 opacity-35" />
 
       <header className="sticky top-0 z-30 glass-header">

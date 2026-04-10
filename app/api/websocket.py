@@ -26,23 +26,24 @@ async def authenticate_websocket(websocket: WebSocket, session_id: int) -> Optio
         return None
 
     try:
-        from app.core.config import settings
-        if settings.SUPABASE_URL and settings.SUPABASE_SERVICE_ROLE_KEY:
-            from supabase import create_client
-            supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
-            user_response = supabase.auth.get_user(token)
-            if not user_response or not user_response.user:
-                await websocket.close(code=4003, reason="Invalid token")
-                return None
-            user = user_response.user
-            return {
-                "id": user.id,
-                "email": user.email,
-                "role": user.user_metadata.get("role", "candidate"),
-            }
-        else:
-            await websocket.close(code=4003, reason="Auth service unavailable")
+        # CRIT-2 FIX: Use singleton Supabase client instead of creating per-connection
+        from app.core.auth import get_supabase_client, _resolve_role
+        supabase = get_supabase_client()
+        user_response = supabase.auth.get_user(token)
+        if not user_response or not user_response.user:
+            await websocket.close(code=4003, reason="Invalid token")
             return None
+        user = user_response.user
+        # CRIT-1 FIX: Use secure role resolution (app_metadata priority)
+        role = _resolve_role(user)
+        return {
+            "id": user.id,
+            "email": user.email,
+            "role": role,
+        }
+    except ValueError:
+        await websocket.close(code=4003, reason="Auth service unavailable")
+        return None
     except Exception as e:
         logger.error(f"WebSocket auth failed: {e}")
         await websocket.close(code=4003, reason="Authentication failed")

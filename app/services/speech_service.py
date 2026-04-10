@@ -4,6 +4,7 @@ Transcribes audio from interviews using Whisper.
 """
 import io
 import asyncio
+import tempfile
 from pathlib import Path
 from typing import Optional, Dict, Any
 from app.core.config import settings
@@ -76,8 +77,10 @@ class SpeechService:
         """Transcribe using local Whisper model."""
         
         try:
-            temp_path = Path("/tmp/temp_audio.wav")
-            temp_path.write_bytes(audio_file)
+            # CRIT-3 FIX: Use unique temp file per request to prevent race conditions
+            with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as tmp:
+                tmp.write(audio_file)
+                temp_path = Path(tmp.name)
             
             loop = asyncio.get_event_loop()
             result = await loop.run_in_executor(
@@ -128,7 +131,15 @@ class SpeechService:
         if not segments:
             return 0.0
         
-        return 0.85
+        # Calculate actual average confidence from segment probabilities
+        avg_logprobs = [seg.get('avg_logprob', -1.0) for seg in segments if 'avg_logprob' in seg]
+        if avg_logprobs:
+            import math
+            avg = sum(avg_logprobs) / len(avg_logprobs)
+            # Convert log prob to a 0-1 confidence scale
+            return round(min(1.0, max(0.0, math.exp(avg))), 2)
+        
+        return 0.85  # Fallback only when no logprob data available
     
     async def _transcribe_openai(
         self,

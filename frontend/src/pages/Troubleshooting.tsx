@@ -259,7 +259,7 @@ const TroubleshootAccordion: React.FC<{
         </div>
         <ChevronDown
           className={`w-4 h-4 text-ink-ghost shrink-0 transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-bronze' : ''
+            isOpen ? 'rotate-180 text-primary' : ''
           }`}
         />
       </button>
@@ -290,7 +290,7 @@ const TroubleshootAccordion: React.FC<{
             <ol className="space-y-2">
               {item.steps.map((step, i) => (
                 <li key={i} className="flex items-start gap-3 text-sm text-ink-secondary">
-                  <span className="text-[10px] font-mono text-bronze/60 bg-bronze/[0.08] rounded px-1.5 py-0.5 shrink-0 mt-0.5">
+                  <span className="text-[10px] font-mono text-primary/60 bg-primary/[0.08] rounded px-1.5 py-0.5 shrink-0 mt-0.5">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   {step}
@@ -330,7 +330,7 @@ export const Troubleshooting = () => {
         }}
       />
 
-      <div className="ambient-orb ambient-orb-bronze w-[500px] h-[500px] top-[-10%] right-[5%] z-0 opacity-55" />
+      <div className="ambient-orb ambient-orb-primary w-[500px] h-[500px] top-[-10%] right-[5%] z-0 opacity-55" />
       <div className="ambient-orb ambient-orb-blue w-[400px] h-[400px] bottom-[15%] left-[-5%] z-0 opacity-40" />
 
       <div className="relative z-10">
@@ -339,7 +339,7 @@ export const Troubleshooting = () => {
             <Logo size="md" showWordmark linkTo="/" />
             <Link
               to="/login"
-              className="px-5 py-2 border border-neeti-border hover:border-bronze/50 bg-neeti-elevated text-ink-primary text-sm font-medium rounded-md transition-all duration-200 hover:shadow-glow"
+              className="px-5 py-2 border border-neeti-border hover:border-primary/50 bg-neeti-elevated text-ink-primary text-sm font-medium rounded-md transition-all duration-200 hover:shadow-glow"
             >
               Access System
             </Link>
@@ -348,9 +348,9 @@ export const Troubleshooting = () => {
 
         <section className="max-w-4xl mx-auto px-6 pt-20 pb-12">
           <div className="animate-fadeUp">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-bronze/25 bg-bronze/[0.08] backdrop-blur-md rounded-full mb-6">
-              <Terminal className="w-3.5 h-3.5 text-bronze" />
-              <span className="text-xs font-mono text-bronze tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-primary/25 bg-primary/[0.08] backdrop-blur-md rounded-full mb-6">
+              <Terminal className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-mono text-primary tracking-wider">
                 DIAGNOSTIC GUIDE
               </span>
             </div>
@@ -358,7 +358,7 @@ export const Troubleshooting = () => {
             <h1 className="text-4xl lg:text-5xl font-display font-bold text-ink-primary leading-[1.1] tracking-tight mb-4">
               Troubleshooting
               <br />
-              <span className="text-gradient-bronze">& Issue Resolution</span>
+              <span className="text-gradient-primary">& Issue Resolution</span>
             </h1>
 
             <p className="text-lg text-ink-secondary leading-relaxed max-w-2xl">
@@ -371,7 +371,7 @@ export const Troubleshooting = () => {
         <section className="max-w-4xl mx-auto px-6 pb-8">
           <div className="glass-subtle p-5 mb-8">
             <div className="flex items-center gap-2 mb-4">
-              <RefreshCw className="w-4 h-4 text-bronze" />
+              <RefreshCw className="w-4 h-4 text-primary" />
               <span className="text-[10px] font-mono text-ink-ghost tracking-[0.2em]">
                 QUICK DIAGNOSTICS
               </span>
@@ -399,7 +399,7 @@ export const Troubleshooting = () => {
                   className="p-3 border border-white/[0.06] rounded-md bg-neeti-surface/50"
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <check.icon className="w-3.5 h-3.5 text-bronze" strokeWidth={1.5} />
+                    <check.icon className="w-3.5 h-3.5 text-primary" strokeWidth={1.5} />
                     <span className="text-xs font-medium text-ink-primary">{check.label}</span>
                   </div>
                   <p className="text-[11px] text-ink-tertiary">{check.detail}</p>
@@ -415,7 +415,7 @@ export const Troubleshooting = () => {
               placeholder="Describe your issue..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-neeti-surface border border-neeti-border rounded-md text-sm text-ink-primary placeholder:text-ink-ghost focus:outline-none focus:border-bronze/40 transition-colors"
+              className="w-full pl-11 pr-4 py-3 bg-neeti-surface border border-neeti-border rounded-md text-sm text-ink-primary placeholder:text-ink-ghost focus:outline-none focus:border-primary/40 transition-colors"
             />
           </div>
 
@@ -428,7 +428,7 @@ export const Troubleshooting = () => {
                   onClick={() => setActiveCategory(cat)}
                   className={`px-3.5 py-1.5 text-xs font-mono tracking-wider rounded-md border transition-all duration-200 inline-flex items-center gap-1.5 ${
                     activeCategory === cat
-                      ? 'border-bronze/40 bg-bronze/[0.12] text-bronze'
+                      ? 'border-primary/40 bg-primary/[0.12] text-primary'
                       : 'border-neeti-border bg-neeti-surface text-ink-tertiary hover:text-ink-secondary hover:border-white/[0.10]'
                   }`}
                 >
@@ -459,7 +459,7 @@ export const Troubleshooting = () => {
                 Try adjusting your search or{' '}
                 <a
                   href="mailto:support@neeti-ai.com"
-                  className="text-bronze hover:text-bronze-light transition-colors"
+                  className="text-primary hover:text-primary-light transition-colors"
                 >
                   contact support
                 </a>{' '}
@@ -474,7 +474,7 @@ export const Troubleshooting = () => {
             <div className="grid sm:grid-cols-2 gap-6">
               <div className="glass-subtle p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <CheckCircle2 className="w-5 h-5 text-bronze" />
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
                   <h3 className="text-base font-display font-semibold text-ink-primary">
                     Resolved?
                   </h3>
@@ -485,7 +485,7 @@ export const Troubleshooting = () => {
                 </p>
                 <Link
                   to="/dashboard"
-                  className="text-sm text-bronze hover:text-bronze-light font-medium transition-colors"
+                  className="text-sm text-primary hover:text-primary-light font-medium transition-colors"
                 >
                   Go to Dashboard →
                 </Link>
@@ -504,7 +504,7 @@ export const Troubleshooting = () => {
                 </p>
                 <a
                   href="mailto:support@neeti-ai.com"
-                  className="text-sm text-bronze hover:text-bronze-light font-medium transition-colors"
+                  className="text-sm text-primary hover:text-primary-light font-medium transition-colors"
                 >
                   Email Support →
                 </a>

@@ -22,7 +22,7 @@ export const Logo: React.FC<LogoProps> = ({
   className,
 }) => {
   const s = SIZE_MAP[size];
-  const fill = color || '#D4873F';
+  const fill = color || '#4C82FB';
 
   const Wrapper = linkTo
     ? ({ children }: { children: React.ReactNode }) => (
@@ -55,9 +55,9 @@ export const Logo: React.FC<LogoProps> = ({
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-          <linearGradient id="bronze-grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+          <linearGradient id="primary-grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#E09848" />
-            <stop offset="50%" stopColor="#D4873F" />
+            <stop offset="50%" stopColor="#4C82FB" />
             <stop offset="100%" stopColor="#B06A28" />
           </linearGradient>
         </defs>
@@ -66,7 +66,7 @@ export const Logo: React.FC<LogoProps> = ({
           cx="32"
           cy="32"
           r="29"
-          stroke="url(#bronze-grad)"
+          stroke="url(#primary-grad)"
           strokeWidth="1.8"
           fill="none"
           opacity="0.6"
@@ -76,7 +76,7 @@ export const Logo: React.FC<LogoProps> = ({
           cx="32"
           cy="32"
           r="22"
-          stroke="url(#bronze-grad)"
+          stroke="url(#primary-grad)"
           strokeWidth="1.2"
           fill="none"
           opacity="0.35"
@@ -105,7 +105,7 @@ export const Logo: React.FC<LogoProps> = ({
           cy="32"
           r="7"
           fill="none"
-          stroke="url(#bronze-grad)"
+          stroke="url(#primary-grad)"
           strokeWidth="1.6"
         />
 
@@ -147,7 +147,7 @@ export const Logo: React.FC<LogoProps> = ({
             style={{ fontSize: s * 0.65 }}
           >
             Neeti
-            <span className="text-bronze ml-0.5" style={{ fontSize: s * 0.5 }}>
+            <span className="text-primary ml-0.5" style={{ fontSize: s * 0.5 }}>
               AI
             </span>
           </span>

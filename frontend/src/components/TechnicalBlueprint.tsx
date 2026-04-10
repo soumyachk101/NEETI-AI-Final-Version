@@ -31,10 +31,10 @@ export const TechnicalBlueprint: React.FC<TechnicalBlueprintProps> = ({
           {[40, 75, 60, 90, 55, 85, 70].map((height, i) => (
             <div
               key={i}
-              className="w-8 bg-bronze/20 border border-bronze/30 relative transition-all duration-500"
+              className="w-8 bg-primary/20 border border-primary/30 relative transition-all duration-500"
               style={{ height: `${height}%` }}
             >
-              <div className="absolute top-0 left-0 right-0 h-px bg-bronze" />
+              <div className="absolute top-0 left-0 right-0 h-px bg-primary" />
             </div>
           ))}
         </div>
@@ -48,11 +48,11 @@ export const TechnicalBlueprint: React.FC<TechnicalBlueprintProps> = ({
             <div key={i}>
               <div className="flex justify-between text-[10px] font-mono mb-1">
                 <span className="text-ink-ghost">{item.label}</span>
-                <span className="text-bronze font-bold">{item.value}%</span>
+                <span className="text-primary font-bold">{item.value}%</span>
               </div>
               <div className="w-full h-0.5 bg-neeti-border rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-bronze rounded-full transition-all duration-700"
+                  className="h-full bg-primary rounded-full transition-all duration-700"
                   style={{ width: `${item.value}%` }}
                 />
               </div>

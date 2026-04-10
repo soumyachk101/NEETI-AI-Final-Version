@@ -15,10 +15,10 @@ const DemoOne = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-bronze/30 bg-bronze/10 backdrop-blur-md mb-4"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-md mb-4"
         >
-          <Infinity className="w-5 h-5 text-bronze animate-pulse" />
-          <span className="text-xs font-mono text-bronze tracking-widest uppercase">Aurora Neural Interface</span>
+          <Infinity className="w-5 h-5 text-primary animate-pulse" />
+          <span className="text-xs font-mono text-primary tracking-widest uppercase">Aurora Neural Interface</span>
         </motion.div>
 
         <motion.h1 
@@ -27,7 +27,7 @@ const DemoOne = () => {
           transition={{ delay: 0.2, duration: 0.8 }}
           className="text-5xl md:text-7xl font-display font-bold text-ink-primary tracking-tight"
         >
-          Next-Gen <span className="text-gradient-bronze">Visual Fidelity</span>
+          Next-Gen <span className="text-gradient-primary">Visual Fidelity</span>
         </motion.h1>
 
         <motion.p
@@ -48,7 +48,7 @@ const DemoOne = () => {
         >
           <Link 
             to="/" 
-            className="flex items-center gap-2 px-6 py-3 bg-bronze text-white rounded-lg font-medium hover:bg-bronze-light transition-all hover:shadow-glow active:scale-95"
+            className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-light transition-all hover:shadow-glow active:scale-95"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Landing
@@ -62,8 +62,8 @@ const DemoOne = () => {
       </div>
 
       {/* Decorative corners */}
-      <div className="absolute top-10 left-10 w-20 h-20 border-t-2 border-l-2 border-bronze/20" />
-      <div className="absolute bottom-10 right-10 w-20 h-20 border-b-2 border-r-2 border-bronze/20" />
+      <div className="absolute top-10 left-10 w-20 h-20 border-t-2 border-l-2 border-primary/20" />
+      <div className="absolute bottom-10 right-10 w-20 h-20 border-b-2 border-r-2 border-primary/20" />
     </div>
   );
 };

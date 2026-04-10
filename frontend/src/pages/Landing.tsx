@@ -122,7 +122,7 @@ function ScrollProgressBeam({ targetRef }: { targetRef: React.RefObject<HTMLElem
 
   return (
     <motion.div 
-      className="absolute top-0 left-0 h-full bg-gradient-to-r from-transparent via-bronze to-transparent shadow-[0_0_15px_rgba(212,175,55,0.5)]"
+      className="absolute top-0 left-0 h-full bg-gradient-to-r from-transparent via-primary to-transparent shadow-[0_0_15px_rgba(212,175,55,0.5)]"
       style={{ width: "100%", scaleX: scrollYProgress, originX: 0, position: 'absolute' }}
     />
   );
@@ -146,9 +146,9 @@ function CinematicOrbitSection() {
     <motion.section 
       ref={containerRef}
       style={{ opacity }}
-      className="relative py-32 overflow-hidden bg-[#0a0a0b] border-y border-white/[0.05] shadow-2xl"
+      className="relative py-32 overflow-hidden bg-neeti-bg border-y border-white/[0.05] shadow-2xl"
     >
-      <div className="absolute inset-0 bg-[#080809] pointer-events-none" />
+      <div className="absolute inset-0 bg-neeti-bg pointer-events-none" />
       
       <motion.div 
         style={{ scale, y }} 
@@ -160,11 +160,11 @@ function CinematicOrbitSection() {
           speed={0.005}
           centerContent={
             <div className="flex flex-col items-center gap-2">
-              <span className="text-[10px] font-mono text-bronze tracking-[0.3em] uppercase opacity-60">Engineered with</span>
+              <span className="text-[10px] font-mono text-primary tracking-[0.3em] uppercase opacity-60">Engineered with</span>
               <h4 className="text-xl font-display font-bold text-white tracking-widest uppercase">
                 Architecture
               </h4>
-              <div className="w-12 h-0.5 bg-bronze/30 rounded-full" />
+              <div className="w-12 h-0.5 bg-primary/30 rounded-full" />
             </div>
           }
         />
@@ -199,7 +199,7 @@ export const Landing = () => {
   return (
     <div className="relative flex w-full flex-col min-h-screen overflow-x-hidden">
       
-      <main className="relative z-10 w-full bg-[#030303] shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+      <main className="relative z-10 w-full bg-cover bg-center bg-no-repeat bg-fixed shadow-[0_20px_50px_rgba(0,0,0,0.5)]" style={{ backgroundImage: 'url("/bg-landing.png")' }}>
         <header className="glass-header sticky top-0 z-50">
           {/* ... existing header content ... */}
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -220,7 +220,7 @@ export const Landing = () => {
               </Link>
               <Link
                 to="/login"
-                className="px-5 py-2 border border-neeti-border hover:border-bronze/50 bg-neeti-elevated text-ink-primary text-sm font-medium rounded-md transition-all duration-200 hover:shadow-glow"
+                className="px-5 py-2 border border-neeti-border hover:border-primary/50 bg-neeti-elevated text-ink-primary text-sm font-medium rounded-md transition-all duration-200 hover:shadow-glow"
               >
                 Access System
               </Link>
@@ -230,22 +230,22 @@ export const Landing = () => {
 
         {/* Hero Section */}
         <section className="relative flex flex-col items-center justify-center pt-24 pb-20 px-6 max-w-7xl mx-auto w-full transition-all duration-500">
-          <Card className="w-full min-h-[600px] bg-black/[0.80] backdrop-blur-md relative overflow-hidden rounded-[2.5rem] border border-white/10 shadow-2xl">
+          <Card className="w-full min-h-[600px] bg-[#0E0E11]/[0.85] backdrop-blur-3xl relative overflow-hidden rounded-[2.5rem] border border-primary/20 shadow-[0_0_80px_-20px_rgba(76,130,251,0.25)]">
             <Spotlight size={800} />
             
             <div className="flex flex-col lg:flex-row h-full min-h-[600px]">
               {/* Left content */}
               <div className="flex-1 p-8 md:p-14 relative z-10 flex flex-col justify-center">
-                <div className="inline-flex flex-shrink-0 items-center gap-2 px-3 py-1.5 border border-bronze/25 bg-bronze/[0.08] rounded-full mb-8 w-fit select-none">
-                  <Shield className="w-3.5 h-3.5 text-bronze" />
-                  <span className="text-xs font-mono text-bronze tracking-wider">
+                <div className="inline-flex flex-shrink-0 items-center gap-2 px-3 py-1.5 border border-primary/25 bg-primary/[0.08] rounded-full mb-8 w-fit select-none">
+                  <Shield className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs font-mono text-primary tracking-wider">
                     TECHNICAL ASSESSMENT v2.1
                   </span>
                 </div>
                 
                 <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter leading-[1.1] mb-6">
                   <span className="text-white">Evidence-Based</span> <br />
-                  <span className="text-gradient-bronze">Technical Judgment</span>
+                  <span className="text-gradient-primary">Technical Judgment</span>
                 </h1>
                 
                 <TypewriterText 
@@ -263,7 +263,7 @@ export const Landing = () => {
                     
                 <div className="flex flex-col sm:flex-row items-start gap-4"> 
                     <Link to="/register">
-                      <LiquidButton className="text-white border border-white/20" size={'xl'}>
+                      <LiquidButton variant="white" className="border border-white/20" size={'xl'}>
                         Initiate Evaluation <ArrowRight className="w-4 h-4 ml-2" />
                       </LiquidButton> 
                     </Link>
@@ -288,7 +288,7 @@ export const Landing = () => {
 
         <section className="py-24 max-w-7xl mx-auto px-6">
           <ScrollReveal variant="fade-up" duration={800} threshold={0.2}>
-            <Card className="w-full relative overflow-hidden backdrop-blur-md bg-black/[0.60] border border-white/10 rounded-[2.5rem] shadow-2xl p-8 md:p-14 transition-all duration-500 hover:shadow-bronze/10 hover:border-bronze/30 group">
+            <Card className="w-full relative overflow-hidden backdrop-blur-2xl bg-[#0E0E11]/[0.60] border border-primary/10 rounded-[2.5rem] shadow-[0_0_50px_-12px_rgba(76,130,251,0.15)] p-8 md:p-14 transition-all duration-700 hover:shadow-[0_0_80px_-15px_rgba(76,130,251,0.25)] hover:border-primary/30 group">
               <Spotlight size={800} />
               
               <div className="relative z-10">
@@ -313,10 +313,10 @@ export const Landing = () => {
                   {CAPABILITIES.map((cap) => (
                     <motion.div key={cap.tag} variants={staggerItem}>
                       <div
-                        className="h-full bg-white/[0.03] border border-white/[0.05] rounded-2xl p-6 hover:bg-white/[0.08] hover:border-bronze/30 hover:-translate-y-2 transition-all duration-300 flex flex-col items-start group/card cursor-default shadow-lg"
+                        className="h-full bg-white/[0.03] border border-white/[0.05] rounded-2xl p-6 hover:bg-white/[0.08] hover:border-primary/30 hover:-translate-y-2 transition-all duration-300 flex flex-col items-start group/card cursor-default shadow-lg"
                       >
-                        <div className="mb-6 relative flex items-center justify-center w-12 h-12 rounded-xl bg-bronze/10 group-hover/card:bg-bronze/20 transition-colors">
-                          <cap.icon className="w-6 h-6 text-bronze transform group-hover/card:scale-110 group-hover/card:rotate-3 transition-transform duration-300" strokeWidth={1.5} />
+                        <div className="mb-6 relative flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 group-hover/card:bg-primary/20 transition-colors">
+                          <cap.icon className="w-6 h-6 text-primary transform group-hover/card:scale-110 group-hover/card:rotate-3 transition-transform duration-300" strokeWidth={1.5} />
                         </div>
                         <h4 className="text-lg font-display font-semibold text-white/90 mb-3 group-hover/card:text-white transition-colors">
                           {cap.title}
@@ -324,7 +324,7 @@ export const Landing = () => {
                         <p className="text-sm text-white/50 leading-relaxed mb-6 flex-grow">
                           {cap.desc}
                         </p>
-                        <span className="text-[10px] font-mono text-bronze/70 tracking-[0.2em] mt-auto uppercase bg-bronze/10 px-2 py-1 rounded-md">
+                        <span className="text-[10px] font-mono text-primary/70 tracking-[0.2em] mt-auto uppercase bg-primary/10 px-2 py-1 rounded-md">
                           MOD: {cap.tag}
                         </span>
                       </div>
@@ -342,15 +342,15 @@ export const Landing = () => {
           style={{ position: 'relative' }}
         >
           {/* Advanced background elements */}
-          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-bronze/20 to-transparent" />
-          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-bronze/20 to-transparent" />
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.03)_0%,transparent_70%)] pointer-events-none" />
           
           <div className="max-w-7xl mx-auto px-6 relative">
             <ScrollReveal variant="fade-up">
               <div className="text-center mb-32">
-                <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-bronze/5 border border-bronze/20 text-[10px] font-mono font-bold text-bronze uppercase tracking-[0.3em] mb-6">
-                  <div className="w-2 h-2 rounded-full bg-bronze animate-pulse" />
+                <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/20 text-[10px] font-mono font-bold text-primary uppercase tracking-[0.3em] mb-6">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                   System Protocol v4.0.2
                 </div>
                 <div className="flex justify-center w-full">
@@ -381,23 +381,23 @@ export const Landing = () => {
                     >
                       {/* Step Indicator with Pulse */}
                       <div className="mb-12 flex items-center justify-center lg:justify-start">
-                        <div className="w-20 h-20 rounded-[2rem] bg-black border border-white/10 flex items-center justify-center font-mono text-3xl font-bold text-bronze shadow-[0_0_50px_rgba(0,0,0,0.5)] group-hover:border-bronze/50 group-hover:shadow-bronze/30 transition-all duration-700 relative z-20 group-hover:rotate-[10deg]">
+                        <div className="w-20 h-20 rounded-[2rem] bg-black border border-white/10 flex items-center justify-center font-mono text-3xl font-bold text-primary shadow-[0_0_50px_rgba(0,0,0,0.5)] group-hover:border-primary/50 group-hover:shadow-primary/30 transition-all duration-700 relative z-20 group-hover:rotate-[10deg]">
                           {phase.num}
                           {/* Inner glow */}
-                          <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-bronze/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                          <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                           {/* Scanning light effect */}
-                          <div className="absolute top-0 left-0 w-full h-1 bg-bronze/40 blur-sm opacity-0 group-hover:opacity-100 group-hover:top-full transition-all duration-1000 ease-in-out" />
+                          <div className="absolute top-0 left-0 w-full h-1 bg-primary/40 blur-sm opacity-0 group-hover:opacity-100 group-hover:top-full transition-all duration-1000 ease-in-out" />
                         </div>
                       </div>
 
                       {/* Content Card - Senior Dev Glassmorphism */}
-                      <Card className="p-10 h-full bg-zinc-950/40 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] hover:bg-zinc-900/40 hover:border-bronze/40 transition-all duration-700 relative overflow-hidden group/card shadow-2xl">
+                      <Card className="p-10 h-full bg-[#1E40AF]/5 backdrop-blur-3xl border border-primary/10 rounded-[2.5rem] hover:bg-[#1E40AF]/10 hover:border-primary/40 transition-all duration-700 relative overflow-hidden group/card shadow-[0_4px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_0_40px_-10px_rgba(76,130,251,0.2)]">
                         <Spotlight size={500} />
                         
                         <div className="relative z-10 flex flex-col h-full">
                           <div className="flex items-center gap-4 mb-6">
-                            <span className="h-0.5 w-12 bg-gradient-to-r from-bronze to-transparent" />
-                            <code className="text-[10px] font-mono text-bronze/80 tracking-[0.25em] uppercase px-2 py-0.5 border border-bronze/10 rounded">
+                            <span className="h-0.5 w-12 bg-gradient-to-r from-primary to-transparent" />
+                            <code className="text-[10px] font-mono text-primary/80 tracking-[0.25em] uppercase px-2 py-0.5 border border-primary/10 rounded">
                               MOD::{phase.tag}
                             </code>
                           </div>
@@ -414,11 +414,11 @@ export const Landing = () => {
                             <div className="flex items-center justify-between pt-8 border-t border-white/5">
                               <div className="flex -space-x-1">
                                 {[1, 2, 3, 4].map((dot) => (
-                                  <div key={dot} className="w-2 h-2 rounded-full border border-white/20 bg-black group-hover/card:border-bronze/50 group-hover/card:bg-bronze/20 transition-all duration-500" style={{ transitionDelay: `${dot * 100}ms` }} />
+                                  <div key={dot} className="w-2 h-2 rounded-full border border-white/20 bg-black group-hover/card:border-primary/50 group-hover/card:bg-primary/20 transition-all duration-500" style={{ transitionDelay: `${dot * 100}ms` }} />
                                 ))}
                               </div>
-                              <div className="p-2 rounded-xl bg-white/5 group-hover/card:bg-bronze/10 transition-colors">
-                                <CheckCircle2 className="w-6 h-6 text-white/5 group-hover/card:text-bronze transition-all duration-700 scale-75 group-hover/card:scale-110" strokeWidth={1} />
+                              <div className="p-2 rounded-xl bg-white/5 group-hover/card:bg-primary/10 transition-colors">
+                                <CheckCircle2 className="w-6 h-6 text-white/5 group-hover/card:text-primary transition-all duration-700 scale-75 group-hover/card:scale-110" strokeWidth={1} />
                               </div>
                             </div>
                           </div>
@@ -441,24 +441,32 @@ export const Landing = () => {
 
         {/* CTA Section */}
         <ScrollReveal variant="scale">
-          <section className="max-w-7xl mx-auto px-6 pb-24">
-            <div className="glass-bronze p-10 md:p-14 text-center space-y-6">
-              <h3 className="text-3xl md:text-4xl font-display font-bold text-ink-primary">
-                Ready to Transform Your Hiring?
-              </h3>
-              <p className="text-ink-secondary max-w-xl mx-auto">
-                Join the new era of evidence-based technical evaluation. Fair, transparent, and powered by AI.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-                <Link to="/register">
-                  <button className="btn-shimmer px-10 py-4 bg-bronze hover:bg-bronze-light text-white font-semibold rounded-md transition-all duration-200 flex items-center gap-2 shadow-glow hover:shadow-glow-strong active:scale-[0.97] text-base">
-                    Get Started Free
-                    <ArrowRight className="w-5 h-5" />
-                  </button>
-                </Link>
-                <Link to="/about" className="text-sm text-ink-secondary hover:text-ink-primary transition-colors underline underline-offset-4">
-                  Learn more about the platform
-                </Link>
+          <section className="max-w-6xl mx-auto px-6 pb-32">
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-[#0E0E11]/60 backdrop-blur-3xl border border-white/10 p-12 md:p-20 text-center shadow-[0_0_120px_-20px_rgba(76,130,251,0.25)] group">
+              {/* Immersive glow background */}
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+              <div className="absolute -top-[50%] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/20 blur-[150px] rounded-full pointer-events-none transition-transform duration-1000 group-hover:scale-110" />
+              
+              <div className="relative z-10 space-y-8">
+                <h3 className="text-3xl md:text-5xl font-display font-medium text-white tracking-tight">
+                  Ready to Transform Your Hiring?
+                </h3>
+                <p className="text-white/60 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+                  Join the new era of evidence-based technical evaluation. Fair, transparent, and powered by autonomous AI agents.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6">
+                  <Link to="/register">
+                    <LiquidButton className="w-full sm:w-auto h-14 px-10 text-base font-medium shadow-[0_0_30px_-5px_rgba(76,130,251,0.5)]">
+                      <span className="flex items-center">
+                        Get Started Free
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                      </span>
+                    </LiquidButton>
+                  </Link>
+                  <Link to="/about" className="text-sm font-medium text-white/50 hover:text-white transition-colors underline underline-offset-8 decoration-white/20 hover:decoration-white/100 duration-300">
+                    Learn more about the platform
+                  </Link>
+                </div>
               </div>
             </div>
           </section>

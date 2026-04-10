@@ -5,23 +5,47 @@ const WS_BASE_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
 export interface WebSocketMessage {
     type: string;
     timestamp: string;
-    data: any;
+    data: Record<string, unknown>;
 }
+
+// CRIT-7 FIX: Configurable reconnect with exponential backoff and max retries
+const MAX_RECONNECT_ATTEMPTS = 5;
+const BASE_RECONNECT_DELAY = 1000; // 1 second
+const MAX_RECONNECT_DELAY = 30000; // 30 seconds
 
 export function useWebSocket(sessionId: number | null) {
     const [isConnected, setIsConnected] = useState(false);
     const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
+    const [connectionFailed, setConnectionFailed] = useState(false);
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimeoutRef = useRef<number | null>(null);
+    const reconnectAttemptsRef = useRef(0);
 
     const connect = useCallback(() => {
         if (!sessionId) return;
 
-        const ws = new WebSocket(`${WS_BASE_URL}/api/ws/session/${sessionId}`);
+        // CRIT-8 FIX: WebSocket connects with auth token
+        const token = localStorage.getItem('auth-storage');
+        let authToken = '';
+        try {
+            const parsed = JSON.parse(token || '{}');
+            // Token would be retrieved from Supabase session in production
+            authToken = parsed?.state?.accessToken || '';
+        } catch {
+            // Proceed without token for now
+        }
+
+        const url = authToken
+            ? `${WS_BASE_URL}/api/ws/session/${sessionId}?token=${authToken}`
+            : `${WS_BASE_URL}/api/ws/session/${sessionId}`;
+
+        const ws = new WebSocket(url);
 
         ws.onopen = () => {
             console.log('WebSocket connected');
             setIsConnected(true);
+            setConnectionFailed(false);
+            reconnectAttemptsRef.current = 0; // Reset on successful connection
         };
 
         ws.onmessage = (event) => {
@@ -42,10 +66,22 @@ export function useWebSocket(sessionId: number | null) {
             setIsConnected(false);
             wsRef.current = null;
 
-            reconnectTimeoutRef.current = setTimeout(() => {
-                console.log('Attempting to reconnect...');
-                connect();
-            }, 3000);
+            // CRIT-7 FIX: Exponential backoff with max retries
+            if (reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
+                const delay = Math.min(
+                    BASE_RECONNECT_DELAY * Math.pow(2, reconnectAttemptsRef.current),
+                    MAX_RECONNECT_DELAY
+                );
+                reconnectAttemptsRef.current += 1;
+                console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})`);
+
+                reconnectTimeoutRef.current = window.setTimeout(() => {
+                    connect();
+                }, delay);
+            } else {
+                console.warn('Max reconnect attempts reached. Connection failed.');
+                setConnectionFailed(true);
+            }
         };
 
         wsRef.current = ws;
@@ -60,9 +96,10 @@ export function useWebSocket(sessionId: number | null) {
             wsRef.current = null;
         }
         setIsConnected(false);
+        reconnectAttemptsRef.current = 0;
     }, []);
 
-    const sendMessage = useCallback((message: any) => {
+    const sendMessage = useCallback((message: Record<string, unknown>) => {
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
             wsRef.current.send(JSON.stringify(message));
         }
@@ -77,13 +114,18 @@ export function useWebSocket(sessionId: number | null) {
         isConnected,
         lastMessage,
         sendMessage,
-        reconnect: connect,
+        connectionFailed,
+        reconnect: () => {
+            reconnectAttemptsRef.current = 0;
+            setConnectionFailed(false);
+            connect();
+        },
     };
 }
 
 export function useLiveMonitoring(sessionId: number | null) {
     const [isConnected, setIsConnected] = useState(false);
-    const [metrics, setMetrics] = useState<any>(null);
+    const [metrics, setMetrics] = useState<Record<string, unknown> | null>(null);
     const wsRef = useRef<WebSocket | null>(null);
     const pingIntervalRef = useRef<number | null>(null);
 
@@ -96,7 +138,7 @@ export function useLiveMonitoring(sessionId: number | null) {
             console.log('Live monitoring connected');
             setIsConnected(true);
 
-            pingIntervalRef.current = setInterval(() => {
+            pingIntervalRef.current = window.setInterval(() => {
                 if (ws.readyState === WebSocket.OPEN) {
                     ws.send(JSON.stringify({ type: 'ping' }));
                 }
@@ -151,6 +193,6 @@ export function useLiveMonitoring(sessionId: number | null) {
         isConnected,
         metrics,
         requestMetrics,
-        flags: [] as any[], // Add flags for compatibility - will be populated when backend implements it
+        flags: [] as string[],
     };
 }

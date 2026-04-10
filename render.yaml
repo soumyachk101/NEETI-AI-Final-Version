@@ -1,8 +1,9 @@
 services:
+  # Web API
   - type: web
     name: neeti-ai-backend
     runtime: python
-    plan: free
+    plan: starter
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
@@ -36,8 +37,45 @@ services:
       - key: LIVEKIT_API_SECRET
         sync: false
       # Set this to your Supabase "direct connection" string (Session mode, port 5432)
-      # Format: postgresql://postgres.[project-ref]:[db-password]@aws-0-[region].pooler.supabase.com:5432/postgres
       - key: DATABASE_URL
         sync: false
       - key: CORS_ORIGINS
         sync: false
+
+  # Celery Worker (agents + sessions)
+  - type: worker
+    name: neeti-ai-worker
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A app.workers.celery_app worker --loglevel=info -Q agents,sessions --concurrency=4
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.7"
+      - key: DATABASE_URL
+        fromService:
+          name: neeti-ai-backend
+          envVarKey: DATABASE_URL
+      - key: SUPABASE_URL
+        fromService:
+          name: neeti-ai-backend
+          envVarKey: SUPABASE_URL
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        fromService:
+          name: neeti-ai-backend
+          envVarKey: SUPABASE_SERVICE_ROLE_KEY
+
+  # Celery Beat (scheduler)
+  - type: worker
+    name: neeti-ai-beat
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A app.workers.celery_app beat --loglevel=info
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.7"
+      - key: DATABASE_URL
+        fromService:
+          name: neeti-ai-backend
+          envVarKey: DATABASE_URL

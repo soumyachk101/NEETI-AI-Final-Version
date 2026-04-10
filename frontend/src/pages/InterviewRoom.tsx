@@ -42,7 +42,7 @@ export const InterviewRoom: React.FC = () => {
     return (
       <div className="min-h-screen bg-neeti-bg flex items-center justify-center">
         <div className="flex flex-col items-center gap-4 animate-fade-in">
-          <div className="w-10 h-10 border-2 border-bronze border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           <p className="text-ink-ghost text-sm font-mono">Connecting to interview room…</p>
         </div>
       </div>
@@ -51,14 +51,14 @@ export const InterviewRoom: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col bg-neeti-bg overflow-hidden relative">
-      <div className="ambient-orb ambient-orb-bronze w-[400px] h-[400px] top-[-15%] right-[5%] z-0 opacity-40" />
+      <div className="ambient-orb ambient-orb-primary w-[400px] h-[400px] top-[-15%] right-[5%] z-0 opacity-40" />
       <div className="ambient-orb ambient-orb-blue w-[300px] h-[300px] bottom-[10%] left-[-5%] z-0 opacity-30" />
 
       <header className="glass-header px-5 py-3 shrink-0 relative z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-5">
             <div className="flex items-center gap-2.5">
-              <FileText className="w-5 h-5 text-bronze" />
+              <FileText className="w-5 h-5 text-primary" />
               <div>
                 <h1 className="text-sm font-display font-semibold text-ink-primary leading-tight">
                   {currentSession.title}
@@ -139,13 +139,13 @@ export const InterviewRoom: React.FC = () => {
           <div className="border-b border-neeti-border bg-neeti-surface/60 px-4 py-2.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Code className="w-4 h-4 text-bronze" />
+                <Code className="w-4 h-4 text-primary" />
                 <span className="text-xs font-semibold text-ink-primary">Code Editor</span>
               </div>
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="text-xs bg-neeti-bg border border-neeti-border rounded-md px-2 py-1 text-ink-secondary focus:outline-none focus:border-bronze transition-colors"
+                className="text-xs bg-neeti-bg border border-neeti-border rounded-md px-2 py-1 text-ink-secondary focus:outline-none focus:border-primary transition-colors"
               >
                 <option value="typescript">TypeScript</option>
                 <option value="javascript">JavaScript</option>

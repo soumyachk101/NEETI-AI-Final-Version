@@ -61,7 +61,7 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-4 space-y-8">
             <div className="inline-block group cursor-pointer">
               <Logo size="lg" showWordmark showTagline linkTo="/" />
-              <div className="h-px w-0 group-hover:w-full bg-bronze transition-all duration-500 mt-1" />
+              <div className="h-px w-0 group-hover:w-full bg-primary transition-all duration-500 mt-1" />
             </div>
 
             <p className="text-sm text-white/50 leading-relaxed max-w-sm font-light">
@@ -88,7 +88,7 @@ export const Footer: React.FC = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     whileHover={{ scale: 1.1, translateY: -2 }}
-                    className="text-white/30 hover:text-bronze transition-colors"
+                    className="text-white/30 hover:text-primary transition-colors"
                   >
                     <social.icon className="w-5 h-5" />
                   </motion.a>
@@ -112,7 +112,7 @@ export const Footer: React.FC = () => {
                         to={link.to}
                         className="group flex items-center text-sm text-white/40 hover:text-white transition-all"
                       >
-                        <ChevronRight className="w-3 h-3 text-bronze opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                        <ChevronRight className="w-3 h-3 text-primary opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                         <span>{link.label}</span>
                       </Link>
                     </li>
@@ -135,7 +135,7 @@ export const Footer: React.FC = () => {
                           rel="noopener noreferrer"
                           className="group flex items-center text-sm text-white/40 hover:text-white transition-all"
                         >
-                          <ChevronRight className="w-3 h-3 text-bronze opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                          <ChevronRight className="w-3 h-3 text-primary opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                           <span>{link.label}</span>
                           <ExternalLink className="w-3 h-3 ml-2 opacity-20" />
                         </a>
@@ -144,7 +144,7 @@ export const Footer: React.FC = () => {
                           to={link.to!}
                           className="group flex items-center text-sm text-white/40 hover:text-white transition-all"
                         >
-                          <ChevronRight className="w-3 h-3 text-bronze opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                          <ChevronRight className="w-3 h-3 text-primary opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                           <span>{link.label}</span>
                         </Link>
                       )}
@@ -161,12 +161,12 @@ export const Footer: React.FC = () => {
                 <div className="p-6 bg-white/[0.02] border border-white/[0.05] rounded-3xl space-y-6">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <Mail className="w-3 h-3 text-bronze" />
+                      <Mail className="w-3 h-3 text-primary" />
                       <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">Support</span>
                     </div>
                     <a
                       href="mailto:neetiatsupport@gmail.com"
-                      className="block text-xs text-white/60 hover:text-bronze transition-colors font-mono"
+                      className="block text-xs text-white/60 hover:text-primary transition-colors font-mono"
                     >
                       neetiatsupport@gmail.com
                     </a>
@@ -199,7 +199,7 @@ export const Footer: React.FC = () => {
 
           <div className="flex items-center gap-8">
             <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono text-white/20 tracking-[0.2em] group">
-              <Shield className="w-3 h-3 group-hover:text-bronze transition-colors" />
+              <Shield className="w-3 h-3 group-hover:text-primary transition-colors" />
               <span>PROTOCOL_ENCRYPT_ACTIVE</span>
             </div>
             <p className="text-[10px] font-mono text-white/10 tracking-[0.4em] uppercase">

@@ -83,7 +83,7 @@ export const About = () => {
         }}
       />
 
-      <div className="ambient-orb ambient-orb-bronze w-[600px] h-[600px] top-[-10%] right-[-5%] z-0 opacity-60" />
+      <div className="ambient-orb ambient-orb-primary w-[600px] h-[600px] top-[-10%] right-[-5%] z-0 opacity-60" />
       <div className="ambient-orb ambient-orb-blue w-[450px] h-[450px] bottom-[20%] left-[-8%] z-0 opacity-40" />
       <div className="ambient-orb ambient-orb-warm w-[350px] h-[350px] top-[50%] right-[10%] z-0 opacity-30" />
 
@@ -93,7 +93,7 @@ export const About = () => {
             <Logo size="md" showWordmark linkTo="/" />
             <Link
               to="/login"
-              className="px-5 py-2 border border-neeti-border hover:border-bronze/50 bg-neeti-elevated text-ink-primary text-sm font-medium rounded-md transition-all duration-200 hover:shadow-glow"
+              className="px-5 py-2 border border-neeti-border hover:border-primary/50 bg-neeti-elevated text-ink-primary text-sm font-medium rounded-md transition-all duration-200 hover:shadow-glow"
             >
               Access System
             </Link>
@@ -102,9 +102,9 @@ export const About = () => {
 
         <section className="max-w-7xl mx-auto px-6 pt-20 pb-16">
           <div className="max-w-3xl animate-fadeUp">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-bronze/25 bg-bronze/[0.08] backdrop-blur-md rounded-full mb-6">
-              <Shield className="w-3.5 h-3.5 text-bronze" />
-              <span className="text-xs font-mono text-bronze tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-primary/25 bg-primary/[0.08] backdrop-blur-md rounded-full mb-6">
+              <Shield className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-mono text-primary tracking-wider">
                 ABOUT NEETI AI
               </span>
             </div>
@@ -112,7 +112,7 @@ export const About = () => {
             <h1 className="text-4xl lg:text-5xl font-display font-bold text-ink-primary leading-[1.1] tracking-tight mb-6">
               Evidence-Based Technical
               <br />
-              <span className="text-gradient-bronze">Interview Intelligence</span>
+              <span className="text-gradient-primary">Interview Intelligence</span>
             </h1>
 
             <p className="text-lg text-ink-secondary leading-relaxed mb-4">
@@ -164,7 +164,7 @@ export const About = () => {
                 },
               ].map((phase) => (
                 <div key={phase.num} className="glass-subtle p-8 group">
-                  <div className="text-3xl font-mono font-bold text-bronze/40 mb-4">
+                  <div className="text-3xl font-mono font-bold text-primary/40 mb-4">
                     {phase.num}
                   </div>
                   <h3 className="text-lg font-display font-semibold text-ink-primary mb-3">
@@ -197,8 +197,8 @@ export const About = () => {
             {AGENTS.map((agent) => (
               <div key={agent.tag} className="glass-subtle p-6 group hover:bg-white/[0.06] transition-all duration-300">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-md bg-bronze/[0.08] flex items-center justify-center group-hover:bg-bronze/[0.14] transition-colors">
-                    <agent.icon className="w-5 h-5 text-bronze" strokeWidth={1.5} />
+                  <div className="w-10 h-10 rounded-md bg-primary/[0.08] flex items-center justify-center group-hover:bg-primary/[0.14] transition-colors">
+                    <agent.icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
                   </div>
                   <div>
                     <h4 className="text-sm font-display font-semibold text-ink-primary">
@@ -215,7 +215,7 @@ export const About = () => {
               </div>
             ))}
 
-            <div className="glass-bronze p-6 flex flex-col justify-between">
+            <div className="glass-primary p-6 flex flex-col justify-between">
               <div>
                 <h4 className="text-sm font-display font-semibold text-ink-primary mb-2">
                   See It In Action
@@ -227,7 +227,7 @@ export const About = () => {
               </div>
               <Link
                 to="/register"
-                className="mt-6 inline-flex items-center gap-2 text-sm text-bronze hover:text-bronze-light font-medium transition-colors"
+                className="mt-6 inline-flex items-center gap-2 text-sm text-primary hover:text-primary-light font-medium transition-colors"
               >
                 Get Started <ArrowRight className="w-4 h-4" />
               </Link>
@@ -250,7 +250,7 @@ export const About = () => {
 
                 <div className="glass-subtle p-6 mb-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <Lock className="w-4 h-4 text-bronze" />
+                    <Lock className="w-4 h-4 text-primary" />
                     <span className="text-[10px] font-mono text-ink-ghost tracking-[0.2em]">
                       SECURITY POSTURE
                     </span>
@@ -258,7 +258,7 @@ export const About = () => {
                   <ul className="space-y-3">
                     {SECURITY_FEATURES.map((feature) => (
                       <li key={feature} className="flex items-start gap-2.5">
-                        <CheckCircle2 className="w-4 h-4 text-bronze shrink-0 mt-0.5" strokeWidth={2} />
+                        <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" strokeWidth={2} />
                         <span className="text-sm text-ink-secondary">{feature}</span>
                       </li>
                     ))}
@@ -272,8 +272,8 @@ export const About = () => {
                 </h3>
                 {TECH_STACK.map((tech) => (
                   <div key={tech.name} className="glass-subtle p-4 flex items-center gap-4 group hover:bg-white/[0.06] transition-all duration-300">
-                    <div className="w-9 h-9 rounded-md bg-bronze/[0.08] flex items-center justify-center shrink-0">
-                      <tech.icon className="w-4.5 h-4.5 text-bronze" strokeWidth={1.5} />
+                    <div className="w-9 h-9 rounded-md bg-primary/[0.08] flex items-center justify-center shrink-0">
+                      <tech.icon className="w-4.5 h-4.5 text-primary" strokeWidth={1.5} />
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-ink-primary">{tech.name}</h4>
@@ -315,7 +315,7 @@ export const About = () => {
                 },
               ].map((item) => (
                 <div key={item.title} className="glass-subtle p-6">
-                  <item.icon className="w-5 h-5 text-bronze mb-3" strokeWidth={1.5} />
+                  <item.icon className="w-5 h-5 text-primary mb-3" strokeWidth={1.5} />
                   <h4 className="text-sm font-display font-semibold text-ink-primary mb-2">
                     {item.title}
                   </h4>
@@ -339,13 +339,13 @@ export const About = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link to="/register">
-                <button className="px-8 py-3.5 bg-bronze hover:bg-bronze-light text-white font-medium rounded-md transition-all duration-200 flex items-center gap-2 shadow-glow hover:shadow-glow-strong">
+                <button className="px-8 py-3.5 bg-primary hover:bg-primary-light text-white font-medium rounded-md transition-all duration-200 flex items-center gap-2 shadow-glow hover:shadow-glow-strong">
                   Create Account
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </Link>
               <Link to="/faq">
-                <button className="px-8 py-3.5 border border-neeti-border hover:border-bronze/40 bg-neeti-surface text-ink-primary font-medium rounded-md transition-all duration-200">
+                <button className="px-8 py-3.5 border border-neeti-border hover:border-primary/40 bg-neeti-surface text-ink-primary font-medium rounded-md transition-all duration-200">
                   View FAQ
                 </button>
               </Link>

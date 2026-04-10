@@ -192,8 +192,12 @@ export const useAuthStore = create<AuthState>()(
 );
 
 // FIX #2: Listen for Supabase auth state changes (token expiry, external signout)
-supabase.auth.onAuthStateChange((event) => {
+// Store the unsubscribe function to prevent listener leaks
+const { data: { subscription: _authSubscription } } = supabase.auth.onAuthStateChange((event) => {
   if (event === 'SIGNED_OUT') {
     clearAllStores();
   }
 });
+
+// Export for manual cleanup if needed (e.g., in tests)
+export const cleanupAuthSubscription = () => _authSubscription.unsubscribe();

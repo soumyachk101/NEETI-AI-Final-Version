@@ -19,14 +19,14 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const base = 'btn-ripple inline-flex items-center justify-center font-medium transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neeti-bg rounded-md active:scale-[0.97]';
+  const base = 'btn-ripple relative inline-flex items-center justify-center font-medium transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent rounded-xl active:scale-[0.98] overflow-hidden group';
 
   const variants = {
-    primary:   'bg-bronze hover:bg-bronze-light text-white border border-bronze hover:border-bronze-light shadow-glow focus:ring-bronze/30',
-    secondary: 'bg-neeti-surface border border-neeti-border text-ink-primary hover:border-neeti-border-strong hover:bg-neeti-elevated focus:ring-bronze/20',
-    critical:  'bg-status-critical hover:bg-red-600 text-white border border-status-critical hover:border-red-600 focus:ring-status-critical/30',
-    success:   'bg-status-success hover:bg-green-600 text-white border border-status-success hover:border-green-600 focus:ring-status-success/30',
-    ghost:     'bg-transparent border border-transparent text-ink-secondary hover:text-ink-primary hover:bg-neeti-surface focus:ring-bronze/20'
+    primary:   'bg-white/10 hover:bg-white/15 text-white border border-white/10 hover:border-white/20 shadow-[0_4px_30px_rgba(76,130,251,0.2)] focus:ring-primary/40 before:absolute before:inset-0 before:bg-gradient-to-r before:from-primary/20 before:to-transparent before:opacity-0 hover:before:opacity-100 before:transition-opacity',
+    secondary: 'bg-white/[0.03] border border-white/[0.05] text-ink-primary hover:border-white/[0.1] hover:bg-white/[0.06] shadow-sm focus:ring-primary/20',
+    critical:  'bg-status-critical/10 hover:bg-status-critical/20 text-status-critical border border-status-critical/20 hover:border-status-critical/40 focus:ring-status-critical/30',
+    success:   'bg-status-success/10 hover:bg-status-success/20 text-status-success border border-status-success/20 hover:border-status-success/40 focus:ring-status-success/30',
+    ghost:     'bg-transparent border border-transparent text-ink-secondary hover:text-ink-primary hover:bg-white/[0.05] focus:ring-primary/20'
   };
 
   const sizes = {

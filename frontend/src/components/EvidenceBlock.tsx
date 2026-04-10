@@ -22,7 +22,7 @@ export const EvidenceBlock: React.FC<EvidenceBlockProps> = ({
     success:  { border: 'border-l-status-success',  accent: 'text-status-success' },
     warning:  { border: 'border-l-status-warning',  accent: 'text-status-warning' },
     critical: { border: 'border-l-status-critical', accent: 'text-status-critical' },
-    neutral:  { border: 'border-l-bronze',           accent: 'text-ink-primary' },
+    neutral:  { border: 'border-l-primary',           accent: 'text-ink-primary' },
   }[type];
 
   return (

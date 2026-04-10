@@ -36,7 +36,7 @@ export const SessionCreate: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neeti-bg relative overflow-hidden">
-      <div className="ambient-orb ambient-orb-bronze w-[450px] h-[450px] top-[-10%] right-[10%] z-0 opacity-50" />
+      <div className="ambient-orb ambient-orb-primary w-[450px] h-[450px] top-[-10%] right-[10%] z-0 opacity-50" />
       <div className="ambient-orb ambient-orb-blue w-[350px] h-[350px] bottom-[20%] left-[-5%] z-0 opacity-35" />
 
       <header className="sticky top-0 z-30 glass-header">
@@ -86,12 +86,12 @@ export const SessionCreate: React.FC = () => {
             />
 
             <div className="pt-6 border-t border-neeti-border">
-              <div className="border-l-2 border-bronze/30 pl-5 mb-8">
+              <div className="border-l-2 border-primary/30 pl-5 mb-8">
                 <h3 className="text-sm font-semibold text-ink-primary mb-3">Session Workflow</h3>
                 <ul className="space-y-2.5">
                   {WORKFLOW_STEPS.map(({ icon: Icon, text }) => (
                     <li key={text} className="flex items-center gap-2.5 text-sm text-ink-secondary">
-                      <Icon className="w-4 h-4 text-bronze shrink-0" />
+                      <Icon className="w-4 h-4 text-primary shrink-0" />
                       {text}
                     </li>
                   ))}

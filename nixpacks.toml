@@ -5,4 +5,5 @@ nixPkgs = ["python311", "gcc", "postgresql", "ffmpeg", "libsndfile"]
 cmds = ["pip install -r requirements.txt"]
 
 [start]
-cmd = "uvicorn app.main:app --host 0.0.0.0 --port 8000"
+# CRIT-14 FIX: Use Railway's dynamic $PORT variable instead of hardcoded 8000
+cmd = "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"

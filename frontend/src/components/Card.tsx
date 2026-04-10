@@ -22,7 +22,7 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const variants = {
     default:  'rounded-lg shadow-card',
-    evidence: 'rounded-r-md border-l-4 border-l-bronze',
+    evidence: 'rounded-r-md border-l-4 border-l-primary',
     control:  'rounded-lg shadow-card',
     elevated: 'rounded-lg shadow-medium',
     glass:    'glass-strong',

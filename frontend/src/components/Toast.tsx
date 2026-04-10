@@ -39,14 +39,14 @@ const STYLE_MAP = {
   success: 'border-status-success/30 bg-status-success/[0.08]',
   error: 'border-status-critical/30 bg-status-critical/[0.08]',
   warning: 'border-status-warning/30 bg-status-warning/[0.08]',
-  info: 'border-bronze/30 bg-bronze/[0.08]',
+  info: 'border-primary/30 bg-primary/[0.08]',
 };
 
 const ICON_COLOR = {
   success: 'text-status-success',
   error: 'text-status-critical',
   warning: 'text-status-warning',
-  info: 'text-bronze',
+  info: 'text-primary',
 };
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {

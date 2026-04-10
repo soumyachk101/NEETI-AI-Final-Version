@@ -55,6 +55,8 @@ apiClient.interceptors.response.use(
   }
 );
 
+// NOTE: Auth is handled directly via Supabase in useAuthStore.
+// These types are kept for backend API compatibility.
 export interface RegisterRequest {
   email: string;
   password: string;
@@ -82,28 +84,6 @@ export interface User {
   is_active: boolean;
   created_at: string;
 }
-
-export const authApi = {
-  register: async (data: RegisterRequest): Promise<User> => {
-    const response = await apiClient.post('/api/auth/register', data);
-    return response.data;
-  },
-
-  login: async (data: LoginRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post('/api/auth/login', data);
-    return response.data;
-  },
-
-  getCurrentUser: async (): Promise<User> => {
-    const response = await apiClient.get('/api/auth/me');
-    return response.data;
-  },
-
-  logout: async (): Promise<void> => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-  },
-};
 
 export interface SessionCreateRequest {
   title: string;

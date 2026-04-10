@@ -13,7 +13,7 @@ const STATUS_CFG = {
   live:      { color: 'text-status-critical', icon: Radio },
   scheduled: { color: 'text-status-warning',  icon: CalendarClock },
   completed: { color: 'text-status-success',  icon: CheckCircle2 },
-  total:     { color: 'text-bronze',           icon: BarChart3 },
+  total:     { color: 'text-primary',           icon: BarChart3 },
 } as const;
 
 function StatCard({ label, value, status = 'total' }: {
@@ -68,7 +68,7 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-neeti-bg relative overflow-hidden">
-      <div className="ambient-orb ambient-orb-bronze w-[500px] h-[500px] top-[-10%] right-[-5%] z-0 opacity-50" />
+      <div className="ambient-orb ambient-orb-primary w-[500px] h-[500px] top-[-10%] right-[-5%] z-0 opacity-50" />
       <div className="ambient-orb ambient-orb-blue w-[400px] h-[400px] bottom-[15%] left-[-8%] z-0 opacity-35" />
 
       <header className="sticky top-0 z-30 glass-header">

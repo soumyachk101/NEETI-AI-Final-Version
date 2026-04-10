@@ -25,7 +25,7 @@ export const SessionJoin: React.FC = () => {
     try {
       await joinSession({ session_code: formData.session_code.toUpperCase(), email: formData.email, full_name: formData.full_name });
       navigate('/interview');
-    } catch {}
+    } catch (e) { console.error('Failed to join session:', e); }
   };
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +35,7 @@ export const SessionJoin: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neeti-bg grid grid-cols-1 lg:grid-cols-12 relative overflow-hidden">
-      <div className="ambient-orb ambient-orb-bronze w-[500px] h-[500px] top-[-10%] left-[30%] z-0 opacity-55" />
+      <div className="ambient-orb ambient-orb-primary w-[500px] h-[500px] top-[-10%] left-[30%] z-0 opacity-55" />
       <div className="ambient-orb ambient-orb-blue w-[350px] h-[350px] bottom-[10%] right-[-3%] z-0 opacity-40" />
 
       <div className="hidden lg:flex lg:col-span-5 border-r border-white/[0.06] p-10 xl:p-14 flex-col justify-between relative z-10">
@@ -49,12 +49,12 @@ export const SessionJoin: React.FC = () => {
               You've been invited to participate in a technical interview evaluation session.
             </p>
 
-            <div className="border-l-2 border-bronze/30 pl-4">
+            <div className="border-l-2 border-primary/30 pl-4">
               <p className="text-xs font-semibold text-ink-primary uppercase tracking-wider mb-3">What to expect</p>
               <ul className="space-y-2.5">
                 {EXPECT_ITEMS.map(({ icon: Icon, text }) => (
                   <li key={text} className="flex items-center gap-2.5 text-sm text-ink-secondary">
-                    <Icon className="w-4 h-4 text-bronze shrink-0" />
+                    <Icon className="w-4 h-4 text-primary shrink-0" />
                     {text}
                   </li>
                 ))}
@@ -88,7 +88,7 @@ export const SessionJoin: React.FC = () => {
               </label>
               <input
                 type="text"
-                className="w-full px-4 py-4 bg-neeti-surface border-2 border-neeti-border rounded-lg text-ink-primary placeholder:text-ink-ghost focus:outline-none focus:border-bronze transition-colors font-mono text-3xl text-center tracking-[0.5em] uppercase"
+                className="w-full px-4 py-4 bg-neeti-surface border-2 border-neeti-border rounded-lg text-ink-primary placeholder:text-ink-ghost focus:outline-none focus:border-primary transition-colors font-mono text-3xl text-center tracking-[0.5em] uppercase"
                 placeholder="ABC123"
                 value={formData.session_code}
                 onChange={handleCodeChange}
