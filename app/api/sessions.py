@@ -445,7 +445,10 @@ async def end_session(
     
     logger.info(f"Session {session_id} ended by recruiter {current_user['id']}")
     
-    await publish_session_end_event(session_id, session)
+    await publish_session_ended(
+        session_id=session_id,
+        data={"ended_at": session.ended_at.isoformat()}
+    )
     
     # Trigger agent processing pipeline via Celery
     from app.workers.session_tasks import handle_session_ended
@@ -484,10 +487,3 @@ async def get_session_candidates(
     
     return candidates
 
-async def publish_session_end_event(session_id: int, session):
-    """Publish event when session ends."""
-    from app.core.events import publish_session_ended
-    await publish_session_ended(
-        session_id=session_id,
-        data={"ended_at": session.ended_at.isoformat()}
-    )

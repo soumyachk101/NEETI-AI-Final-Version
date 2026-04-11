@@ -28,7 +28,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = React.memo(({
   const typingTimeout = useRef<number | undefined>(undefined);
 
   const { user } = useAuthStore();
-  const { onMessage } = useWebSocketContext();
+  const { onMessage, sendMessage } = useWebSocketContext();
   const isRecruiter = user?.role === 'recruiter';
 
   useEffect(() => {
@@ -90,8 +90,36 @@ export const CodeEditor: React.FC<CodeEditorProps> = React.memo(({
         execution_output: result.output,
         execution_error: result.error,
       });
+
+      if (!isRecruiter && sendMessage) {
+        sendMessage({
+          type: 'code.executed',
+          data: {
+            code: value,
+            code_snapshot: value,
+            language,
+            output: result.output,
+            error: result.error,
+            session_id: sessionId
+          }
+        });
+      }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Execution failed');
+      const errMsg = err instanceof Error ? err.message : 'Execution failed';
+      setError(errMsg);
+      
+      if (!isRecruiter && sendMessage) {
+        sendMessage({
+          type: 'code.executed',
+          data: {
+            code: value,
+            code_snapshot: value,
+            language,
+            error: errMsg,
+            session_id: sessionId
+          }
+        });
+      }
     } finally {
       setIsExecuting(false);
     }

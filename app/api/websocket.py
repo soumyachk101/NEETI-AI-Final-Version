@@ -20,35 +20,55 @@ router = APIRouter()
 async def authenticate_websocket(token: str) -> Optional[dict]:
     """
     Authenticate WebSocket connection using token.
-    Returns user dict or None if authentication fails.
+    Supports Supabase access tokens and LiveKit room tokens as fallback.
     """
     if not token:
         logger.warning("WebSocket auth: missing token")
         return None
 
+    from app.core.config import settings
+    
+    # 1. Try Supabase Auth (Standard for Recruiters/Registered users)
     try:
-        from app.core.config import settings
-        if not settings.SUPABASE_URL or not settings.SUPABASE_SERVICE_ROLE_KEY:
-            logger.error("WebSocket auth: Supabase not configured")
-            return None
-
         from supabase import create_client
-        supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
-        user_response = supabase.auth.get_user(token)
+        if settings.SUPABASE_URL and settings.SUPABASE_SERVICE_ROLE_KEY:
+            supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
+            user_response = supabase.auth.get_user(token)
 
-        if not user_response or not user_response.user:
-            logger.warning("WebSocket auth: invalid token")
-            return None
-
-        user = user_response.user
-        return {
-            "id": user.id,
-            "email": user.email,
-            "role": user.user_metadata.get("role", "candidate") if user.user_metadata else "candidate",
-        }
+            if user_response and user_response.user:
+                user = user_response.user
+                return {
+                    "id": user.id,
+                    "email": user.email,
+                    "role": user.user_metadata.get("role", "candidate") if user.user_metadata else "candidate",
+                    "auth_type": "supabase"
+                }
     except Exception as e:
-        logger.error(f"WebSocket auth exception: {e}")
-        return None
+        logger.debug(f"Supabase auth attempt failed: {e}")
+
+    # 2. Try LiveKit Token Auth (For Anonymous Candidates)
+    try:
+        from jose import jwt
+        # LiveKit tokens are signed with the API Secret
+        payload = jwt.decode(token, settings.LIVEKIT_API_SECRET, algorithms=["HS256"])
+        
+        identity = payload.get("sub")
+        if identity:
+            # Identity format check: numeric (anon candidate) or prefixed (standard)
+            role = "candidate"
+            if str(identity).startswith("recruiter-"):
+                role = "recruiter"
+            
+            return {
+                "id": identity,
+                "email": payload.get("name", "Anonymous"),
+                "role": role,
+                "auth_type": "livekit"
+            }
+    except Exception as e:
+        logger.debug(f"LiveKit auth fallback failed: {e}")
+
+    return None
 
 
 async def verify_session_membership(user: dict, session_id: int) -> bool:
@@ -63,25 +83,48 @@ async def verify_session_membership(user: dict, session_id: int) -> bool:
                 logger.warning(f"WebSocket session check: session {session_id} not found")
                 return False
 
-            # Check if recruiter — compare as strings since both are UUIDs stored as strings
-            if str(session.recruiter_id) == str(user["id"]):
+            user_id = str(user["id"])
+            
+            # Check if recruiter
+            # Case A: Supabase UUID
+            # Case B: LiveKit identity f"recruiter-{id}"
+            if user_id == str(session.recruiter_id) or user_id == f"recruiter-{session.recruiter_id}":
                 return True
 
             # Check if candidate
-            result = await db.execute(
-                select(Candidate).where(
-                    and_(
-                        Candidate.session_id == session_id,
-                        Candidate.user_id == str(user["id"])
+            # Case A: Registered candidate (user_id matched)
+            # Case B: Anonymous candidate (candidate.id matched)
+            
+            # Identity format extraction
+            id_to_check = user_id.replace("candidate-", "")
+            
+            if id_to_check.isdigit():
+                # Numeric identity — likely candidate.id
+                result = await db.execute(
+                    select(Candidate).where(
+                        and_(
+                            Candidate.session_id == session_id,
+                            Candidate.id == int(id_to_check)
+                        )
                     )
                 )
-            )
+            else:
+                # UUID string — likely user_id
+                result = await db.execute(
+                    select(Candidate).where(
+                        and_(
+                            Candidate.session_id == session_id,
+                            Candidate.user_id == user_id
+                        )
+                    )
+                )
+                
             if result.scalar_one_or_none():
                 return True
 
         logger.warning(
             f"WebSocket session check failed: user {user['id']} (role={user.get('role')}) "
-            f"not a member of session {session_id} (recruiter_id={session.recruiter_id})"
+            f"not a member of session {session_id}"
         )
         return False
     except Exception as e:
@@ -228,11 +271,63 @@ async def websocket_endpoint(
                 elif msg_type == "request_metrics":
                     try:
                         from app.services.metrics_service import MetricsService
+                        from app.services.device_tracking_service import device_tracking_service
                         metrics = await MetricsService.get_live_metrics(session_id)
-                        await websocket.send_json({"type": "metrics_update", "data": metrics})
+                        device_metrics = await device_tracking_service.get_device_metrics(session_id)
+                        await websocket.send_json({
+                            "type": "metrics_update", 
+                            "data": {
+                                **metrics,
+                                "devices": device_metrics.model_dump()
+                            }
+                        })
                     except Exception as e:
                         logger.warning(f"Metrics request failed: {e}")
                         await websocket.send_json({"type": "metrics_update", "data": {}})
+                
+                elif msg_type == "device.register":
+                    # Handle device registration via WebSocket
+                    try:
+                        from app.services.device_tracking_service import device_tracking_service
+                        from app.schemas.schemas import PeripheralDeviceCreate
+                        device_data = data.get("data", {})
+                        device_create = PeripheralDeviceCreate(**device_data)
+                        device = await device_tracking_service.register_device(
+                            session_id=session_id,
+                            device_data=device_create
+                        )
+                        await websocket.send_json({
+                            "type": "device.registered",
+                            "data": {"device_id": device.id, "status": "success"}
+                        })
+                    except Exception as e:
+                        logger.warning(f"Device registration failed: {e}")
+                        await websocket.send_json({
+                            "type": "device.registered",
+                            "data": {"status": "error", "message": str(e)}
+                        })
+                
+                elif msg_type == "device.event":
+                    # Handle device events via WebSocket
+                    try:
+                        from app.services.device_tracking_service import device_tracking_service
+                        from app.schemas.schemas import DeviceEventCreate
+                        event_data = data.get("data", {})
+                        event_create = DeviceEventCreate(**event_data)
+                        event = await device_tracking_service.track_device_event(
+                            session_id=session_id,
+                            event_data=event_create
+                        )
+                        await websocket.send_json({
+                            "type": "device.event_tracked",
+                            "data": {"event_id": event.id, "status": "success"}
+                        })
+                    except Exception as e:
+                        logger.warning(f"Device event tracking failed: {e}")
+                        await websocket.send_json({
+                            "type": "device.event_tracked",
+                            "data": {"status": "error", "message": str(e)}
+                        })
 
         except WebSocketDisconnect:
             logger.info(f"Client disconnected from session {session_id}")

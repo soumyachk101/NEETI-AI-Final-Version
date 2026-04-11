@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Optional, Any, Union
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
-from app.models.models import UserRole, SessionStatus, AgentType
+from app.models.models import UserRole, SessionStatus, AgentType, DeviceType, DeviceStatus
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -217,3 +217,93 @@ class WSMetricUpdate(WSMessage):
 class WSSessionUpdate(WSMessage):
     """Session status update."""
     type: str = "session_update"
+
+# Device Tracking Schemas
+class PeripheralDeviceCreate(BaseModel):
+    device_id: str = Field(..., min_length=1, max_length=255)
+    device_type: DeviceType
+    device_name: Optional[str] = Field(None, max_length=255)
+    manufacturer: Optional[str] = Field(None, max_length=255)
+    model: Optional[str] = Field(None, max_length=255)
+    capabilities: dict[str, Any] = Field(default_factory=dict)
+    properties: dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+class PeripheralDeviceUpdate(BaseModel):
+    device_name: Optional[str] = Field(None, max_length=255)
+    status: Optional[DeviceStatus] = None
+    is_active: Optional[bool] = None
+    capabilities: Optional[dict[str, Any]] = None
+    properties: Optional[dict[str, Any]] = None
+
+class PeripheralDeviceResponse(BaseModel):
+    id: int
+    session_id: int
+    candidate_id: Optional[int]
+    device_id: str
+    device_type: DeviceType
+    device_name: Optional[str]
+    manufacturer: Optional[str]
+    model: Optional[str]
+    status: DeviceStatus
+    is_active: bool
+    first_connected_at: datetime
+    last_active_at: Optional[datetime]
+    disconnected_at: Optional[datetime]
+    connection_count: int
+    capabilities: dict[str, Any]
+    properties: dict[str, Any]
+    total_usage_time_seconds: float
+    interaction_count: int
+    metadata: dict[str, Any]
+    
+    model_config = ConfigDict(from_attributes=True)
+
+class DeviceEventCreate(BaseModel):
+    device_id: int
+    event_type: str = Field(..., min_length=1, max_length=50)
+    event_data: dict[str, Any] = Field(default_factory=dict)
+    duration_ms: Optional[int] = Field(None, ge=0)
+    cursor_x: Optional[float] = None
+    cursor_y: Optional[float] = None
+    window_title: Optional[str] = Field(None, max_length=255)
+    application: Optional[str] = Field(None, max_length=255)
+    response_time_ms: Optional[int] = Field(None, ge=0)
+    accuracy: Optional[float] = Field(None, ge=0, le=1)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+class DeviceEventResponse(BaseModel):
+    id: int
+    device_id: int
+    session_id: int
+    event_type: str
+    event_data: dict[str, Any]
+    timestamp: datetime
+    duration_ms: Optional[int]
+    cursor_x: Optional[float]
+    cursor_y: Optional[float]
+    window_title: Optional[str]
+    application: Optional[str]
+    response_time_ms: Optional[int]
+    accuracy: Optional[float]
+    metadata: dict[str, Any]
+    
+    model_config = ConfigDict(from_attributes=True)
+
+class DeviceMetricsResponse(BaseModel):
+    session_id: int
+    total_devices: int
+    active_devices: int
+    device_types: dict[str, int]
+    total_interactions: int
+    average_usage_time: float
+    most_active_device: Optional[PeripheralDeviceResponse]
+    recent_events: list[DeviceEventResponse]
+
+class WSDeviceUpdate(WSMessage):
+    """Device status update."""
+    type: str = "device_update"
+
+class WSDeviceEvent(WSMessage):
+    """Device event notification."""
+    type: str = "device_event"

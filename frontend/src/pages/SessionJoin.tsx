@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Code2, Mic, Eye, Brain } from 'lucide-react';
 import { useSessionStore } from '../store/useSessionStore';
@@ -15,10 +15,13 @@ const EXPECT_ITEMS = [
 
 export const SessionJoin: React.FC = () => {
   const navigate = useNavigate();
-  const { joinSession, isLoading, error, clearError } = useSessionStore();
+  const { joinSession, isLoading, error, clearError, resetSession } = useSessionStore();
   const [formData, setFormData] = useState({ session_code: '', email: '', full_name: '' });
 
-  React.useEffect(() => () => clearError(), [clearError]);
+  useEffect(() => {
+    resetSession();
+    return () => clearError();
+  }, [clearError, resetSession]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

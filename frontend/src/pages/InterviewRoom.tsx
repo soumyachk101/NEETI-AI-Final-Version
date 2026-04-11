@@ -6,9 +6,10 @@ import { useSessionStore } from '../store/useSessionStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { WebSocketProvider, useWebSocketContext } from '../lib/websocket';
 import type { WebSocketMessage } from '../lib/websocket';
+import { usePeripheralTracking } from '../hooks/usePeripheralTracking';
 import { CodeEditor } from '../components/CodeEditor';
 import { Button } from '../components/Button';
-import { LogOut, Code, Maximize2, Minimize2, FileText, Clock, AlertTriangle, Wifi, WifiOff } from 'lucide-react';
+import { LogOut, Code, Maximize2, Minimize2, FileText, Clock, AlertTriangle, Wifi, WifiOff, CheckCircle } from 'lucide-react';
 
 const LIVEKIT_WS_URL = import.meta.env.VITE_LIVEKIT_WS_URL;
 
@@ -112,12 +113,22 @@ export const InterviewRoom: React.FC = () => {
 
 const InterviewRoomContent: React.FC = () => {
   const navigate = useNavigate();
-  const { currentSession, roomToken, fetchRoomToken } = useSessionStore();
+  const { currentSession, roomToken, fetchRoomToken, candidateId } = useSessionStore();
   const { isConnected } = useWebSocketContext();
+
+  usePeripheralTracking(currentSession?.id ?? 0, candidateId);
 
   const [isCodeExpanded, setIsCodeExpanded] = useState(false);
   const [language, setLanguage] = useState('typescript');
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [showEndSessionDialog, setShowEndSessionDialog] = useState(false);
+
+  // Monitor for session status change to COMPLETED
+  useEffect(() => {
+    if (currentSession?.status === 'completed') {
+      setShowEndSessionDialog(true);
+    }
+  }, [currentSession?.status]);
 
   useEffect(() => {
     if (!currentSession) { navigate('/dashboard'); return; }
@@ -265,6 +276,30 @@ const InterviewRoomContent: React.FC = () => {
               <Button variant="critical" className="flex-1" onClick={() => { setShowLeaveDialog(false); navigate('/dashboard'); }}>
                 Leave Interview
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEndSessionDialog && (
+        <div className="dialog-overlay bg-neeti-bg/95 backdrop-blur-xl">
+          <div className="dialog-panel max-w-md w-full mx-4 p-8 space-y-6 text-center">
+            <div className="w-16 h-16 rounded-full bg-status-success/10 flex items-center justify-center mx-auto mb-2">
+              <CheckCircle className="w-8 h-8 text-status-success" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-display font-bold text-ink-primary">Interview Completed</h2>
+              <p className="text-sm text-ink-secondary">
+                Technically, the session has now ended. Our AI agents are currently aggregating your performance metrics.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3">
+              <Button variant="primary" size="lg" className="w-full" onClick={() => navigate(`/sessions/${currentSession.id}/results`)}>
+                View My Initial Results
+              </Button>
+              <p className="text-[10px] text-ink-ghost font-mono uppercase tracking-widest">
+                AI Pipeline Processing...
+              </p>
             </div>
           </div>
         </div>

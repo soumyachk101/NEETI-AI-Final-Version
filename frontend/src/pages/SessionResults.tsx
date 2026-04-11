@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Download, FileText, TrendingUp, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { useAuthStore } from '../store/useAuthStore';
 import { useSessionStore } from '../store/useSessionStore';
 import { evaluationApi, type Evaluation } from '../lib/api';
 import { Button } from '../components/Button';
@@ -61,6 +62,7 @@ export default function SessionResults() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const { currentSession, fetchSession } = useSessionStore();
+  const { user } = useAuthStore();
   const [scores, setScores] = useState<EvaluationScore[]>([]);
   const [agents, setAgents] = useState<AIAgent[]>([]);
   const [overall, setOverall] = useState(0);
@@ -127,7 +129,9 @@ export default function SessionResults() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate(`/sessions/${sessionId}/monitor`)}>Back to Monitor</Button>
+            {user?.role === 'recruiter' && (
+              <Button variant="ghost" size="sm" onClick={() => navigate(`/sessions/${sessionId}/monitor`)}>Back to Monitor</Button>
+            )}
             <Button variant="primary" size="sm" onClick={() => {
               // CRIT-9 FIX: Generate downloadable evaluation report
               const reportText = [

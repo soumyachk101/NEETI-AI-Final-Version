@@ -13,7 +13,7 @@ from app.core.config import settings
 from app.core.database import init_db, close_db
 from app.core.redis import redis_client
 from app.core.logging import logger
-from app.api import supabase_auth, sessions, websocket, coding_events, speech, evaluations
+from app.api import supabase_auth, sessions, websocket, coding_events, speech, evaluations, devices
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -135,6 +135,7 @@ app.include_router(websocket.router, prefix="/api")
 app.include_router(coding_events.router, prefix="/api")
 app.include_router(speech.router, prefix="/api")
 app.include_router(evaluations.router, prefix="/api")
+app.include_router(devices.router, prefix="/api")
 
 @app.get("/")
 async def root():

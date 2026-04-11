@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useCallback, useRef, useState } from 'react';
 /* eslint-disable react-refresh/only-export-components */
 import { supabase } from './supabase';
+import { useSessionStore } from '../store/useSessionStore';
 
 const WS_BASE_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
 
@@ -24,7 +25,7 @@ interface WebSocketContextType {
 }
 
 // ── Shared connection logic ──
-function useWebSocketConnection(sessionId: number | null, wsPath: string) {
+function useWebSocketConnection(sessionId: number | null, wsPath: string, fallbackToken?: string | null) {
     const [isConnected, setIsConnected] = useState(false);
     const [connectionFailed, setConnectionFailed] = useState(false);
     const wsRef = useRef<WebSocket | null>(null);
@@ -42,10 +43,15 @@ function useWebSocketConnection(sessionId: number | null, wsPath: string) {
 
         // Get auth token — guard against missing session
         const { data: { session } } = await supabase.auth.getSession();
-        const authToken = session?.access_token;
+        let authToken = session?.access_token;
+
+        // Fallback to room token (for anonymous candidates)
+        if (!authToken && fallbackToken) {
+            authToken = fallbackToken;
+        }
 
         if (!authToken) {
-            console.warn('[WebSocket] No auth token available, skipping connection');
+            console.warn('[WebSocket] No auth token available (and no fallback), skipping connection');
             setConnectionFailed(true);
             return;
         }
@@ -115,7 +121,7 @@ function useWebSocketConnection(sessionId: number | null, wsPath: string) {
             console.error('[WebSocket] Failed to create connection:', error);
             setConnectionFailed(true);
         }
-    }, [sessionId, wsPath]);
+    }, [sessionId, wsPath, fallbackToken]);
 
     useEffect(() => {
         connectRef.current = connect;
@@ -190,7 +196,8 @@ function useWebSocketConnection(sessionId: number | null, wsPath: string) {
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
 export const WebSocketProvider: React.FC<{ sessionId: number | null; children: React.ReactNode }> = ({ sessionId, children }) => {
-    const value = useWebSocketConnection(sessionId, '/api/ws/session');
+    const roomToken = useSessionStore(s => s.roomToken);
+    const value = useWebSocketConnection(sessionId, '/api/ws/session', roomToken);
 
     return (
         <WebSocketContext.Provider value={value}>
@@ -214,7 +221,8 @@ export function useWebSocket(sessionId: number | null) {
 
 // ── Live Monitoring Hook (for recruiter session monitoring) ──
 export function useLiveMonitoring(sessionId: number | null) {
-    const { isConnected, sendMessage, onMessage, connectionFailed, reconnect } = useWebSocketConnection(sessionId, '/api/ws/session');
+    const roomToken = useSessionStore(s => s.roomToken);
+    const { isConnected, sendMessage, onMessage, connectionFailed, reconnect } = useWebSocketConnection(sessionId, '/api/ws/session', roomToken);
 
     const [metrics, setMetrics] = useState<Record<string, unknown> | null>(null);
 

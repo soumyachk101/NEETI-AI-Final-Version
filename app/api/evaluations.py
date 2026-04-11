@@ -28,12 +28,30 @@ async def _verify_session_access(session_id: int, current_user: dict, db: AsyncS
         if str(session.recruiter_id) != str(user_id):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorised for this session")
     else:
-        candidate = await db.execute(
-            select(Candidate).where(
-                and_(Candidate.session_id == session_id, Candidate.user_id == str(user_id))
+        # Check if user_id is a numeric string (Candidate.id for anonymous users) or a UUID string
+        is_numeric_id = False
+        try:
+            int(str(user_id))
+            is_numeric_id = True
+        except (ValueError, TypeError):
+            pass
+
+        if is_numeric_id:
+            # Identity is numeric Candidate.id (from LiveKit token identity)
+            candidate_result = await db.execute(
+                select(Candidate).where(
+                    and_(Candidate.session_id == session_id, Candidate.id == int(user_id))
+                )
             )
-        )
-        if not candidate.scalar_one_or_none():
+        else:
+            # Identity is Suspabase UUID
+            candidate_result = await db.execute(
+                select(Candidate).where(
+                    and_(Candidate.session_id == session_id, Candidate.user_id == str(user_id))
+                )
+            )
+        
+        if not candidate_result.scalar_one_or_none():
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enrolled in this session")
 
     return session

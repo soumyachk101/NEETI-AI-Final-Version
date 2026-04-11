@@ -109,6 +109,8 @@ class Session(Base):
     vision_metrics = relationship("VisionMetric", back_populates="session", cascade="all, delete-orphan")
     agent_outputs = relationship("AgentOutput", back_populates="session", cascade="all, delete-orphan")
     evaluations = relationship("Evaluation", back_populates="session", cascade="all, delete-orphan")
+    peripheral_devices = relationship("PeripheralDevice", back_populates="session", cascade="all, delete-orphan")
+    device_events = relationship("DeviceEvent", back_populates="session", cascade="all, delete-orphan")
     
     __table_args__ = (
         Index("idx_session_status_recruiter", "status", "recruiter_id"),
@@ -239,6 +241,109 @@ class AgentOutput(Base):
     
     __table_args__ = (
         Index("idx_agent_output_session_type", "session_id", "agent_type"),
+    )
+
+class DeviceType(str, PyEnum):
+    """Peripheral device types."""
+    KEYBOARD = "keyboard"
+    MOUSE = "mouse"
+    MICROPHONE = "microphone"
+    WEBCAM = "webcam"
+    SPEAKERS = "speakers"
+    MONITOR = "monitor"
+    TOUCHPAD = "touchpad"
+    STYLUS = "stylus"
+    HEADPHONES = "headphones"
+    BLUETOOTH_DEVICE = "bluetooth_device"
+    USB_DEVICE = "usb_device"
+    OTHER = "other"
+
+class DeviceStatus(str, PyEnum):
+    """Device connection status."""
+    CONNECTED = "connected"
+    DISCONNECTED = "disconnected"
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    ERROR = "error"
+    UNKNOWN = "unknown"
+
+class PeripheralDevice(Base):
+    """Peripheral device tracking for interview sessions."""
+    __tablename__ = "peripheral_devices"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(Integer, ForeignKey("sessions.id"), nullable=False)
+    candidate_id = Column(Integer, ForeignKey("candidates.id"), nullable=True)
+    
+    device_id = Column(String(255), nullable=False, index=True)  # Unique device identifier
+    device_type = Column(Enum(DeviceType, values_callable=lambda x: [e.value for e in x]), nullable=False, index=True)
+    device_name = Column(String(255), nullable=True)
+    manufacturer = Column(String(255), nullable=True)
+    model = Column(String(255), nullable=True)
+    
+    status = Column(Enum(DeviceStatus, values_callable=lambda x: [e.value for e in x]), default=DeviceStatus.UNKNOWN, index=True)
+    is_active = Column(Boolean, default=False)
+    
+    # Connection tracking
+    first_connected_at = Column(DateTime(timezone=True), server_default=func.now())
+    last_active_at = Column(DateTime(timezone=True), nullable=True)
+    disconnected_at = Column(DateTime(timezone=True), nullable=True)
+    connection_count = Column(Integer, default=0)
+    
+    # Device capabilities and properties
+    capabilities = Column(JSON, default=dict)  # e.g., {"has_microphone": true, "resolution": "1920x1080"}
+    properties = Column(JSON, default=dict)   # Device-specific properties
+    
+    # Usage metrics
+    total_usage_time_seconds = Column(Float, default=0.0)
+    interaction_count = Column(Integer, default=0)
+    
+    meta_data = Column(JSON, default=dict)
+    
+    # Relationships
+    session = relationship("Session")
+    candidate = relationship("Candidate")
+    device_events = relationship("DeviceEvent", back_populates="device", cascade="all, delete-orphan")
+    
+    __table_args__ = (
+        Index("idx_device_session_type", "session_id", "device_type"),
+        Index("idx_device_status_active", "status", "is_active"),
+        Index("idx_device_candidate", "candidate_id"),
+    )
+
+class DeviceEvent(Base):
+    """Events related to peripheral device usage."""
+    __tablename__ = "device_events"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    device_id = Column(Integer, ForeignKey("peripheral_devices.id"), nullable=False)
+    session_id = Column(Integer, ForeignKey("sessions.id"), nullable=False)
+    
+    event_type = Column(String(50), nullable=False, index=True)  # "keystroke", "click", "scroll", "volume_change", etc.
+    event_data = Column(JSON, default=dict)  # Event-specific data
+    
+    timestamp = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+    duration_ms = Column(Integer, nullable=True)  # Duration of the event
+    
+    # Location and context
+    cursor_x = Column(Float, nullable=True)
+    cursor_y = Column(Float, nullable=True)
+    window_title = Column(String(255), nullable=True)
+    application = Column(String(255), nullable=True)
+    
+    # Performance metrics
+    response_time_ms = Column(Integer, nullable=True)
+    accuracy = Column(Float, nullable=True)  # For certain event types
+    
+    meta_data = Column(JSON, default=dict)
+    
+    # Relationships
+    device = relationship("PeripheralDevice", back_populates="device_events")
+    session = relationship("Session")
+    
+    __table_args__ = (
+        Index("idx_device_event_timestamp", "device_id", "timestamp"),
+        Index("idx_device_event_session_type", "session_id", "event_type"),
     )
 
 class Evaluation(Base):

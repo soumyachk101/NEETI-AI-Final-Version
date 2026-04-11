@@ -56,42 +56,57 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ) -> dict:
     """
-    Dependency to get current authenticated user from Supabase.
-    Validates JWT token from Supabase and returns user data.
+    Dependency to get current authenticated user.
+    Supports Supabase access tokens and LiveKit room tokens as fallback.
     """
     token = credentials.credentials
     
+    # 1. Try Supabase Auth
     try:
         supabase = get_supabase_client()
-        
         user_response = supabase.auth.get_user(token)
         
-        if not user_response or not user_response.user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        
-        user = user_response.user
-        role = _resolve_role(user)
-        
-        return {
-            "id": user.id,
-            "email": user.email,
-            "full_name": user.user_metadata.get("full_name") if user.user_metadata else None,
-            "role": role,
-        }
-        
-    except HTTPException:
-        raise
+        if user_response and user_response.user:
+            user = user_response.user
+            role = _resolve_role(user)
+            
+            return {
+                "id": user.id,
+                "email": user.email,
+                "full_name": user.user_metadata.get("full_name") if user.user_metadata else None,
+                "role": role,
+                "auth_type": "supabase"
+            }
     except Exception as e:
-        logger.error(f"Authentication error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        logger.debug(f"Supabase auth attempt failed in get_current_user: {e}")
+        
+    # 2. Try LiveKit Token Auth (For Anonymous Candidates)
+    try:
+        from jose import jwt
+        payload = jwt.decode(token, settings.LIVEKIT_API_SECRET, algorithms=["HS256"])
+        
+        identity = payload.get("sub")
+        if identity:
+            # Identity format check
+            role = "candidate"
+            if str(identity).startswith("recruiter-"):
+                role = "recruiter"
+                
+            return {
+                "id": identity,
+                "email": payload.get("name", "Anonymous"),
+                "full_name": payload.get("name"),
+                "role": role,
+                "auth_type": "livekit"
+            }
+    except Exception as e:
+        logger.debug(f"LiveKit auth fallback failed in get_current_user: {e}")
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 security_optional = HTTPBearer(auto_error=False)
 
@@ -103,24 +118,47 @@ async def get_optional_user(
         return None
         
     token = credentials.credentials
+    
+    # 1. Try Supabase
     try:
         supabase = get_supabase_client()
         user_response = supabase.auth.get_user(token)
         
-        if not user_response or not user_response.user:
-            return None
-        
-        user = user_response.user
-        role = _resolve_role(user)
-        
-        return {
-            "id": user.id,
-            "email": user.email,
-            "full_name": user.user_metadata.get("full_name") if user.user_metadata else None,
-            "role": role,
-        }
+        if user_response and user_response.user:
+            user = user_response.user
+            role = _resolve_role(user)
+            
+            return {
+                "id": user.id,
+                "email": user.email,
+                "full_name": user.user_metadata.get("full_name") if user.user_metadata else None,
+                "role": role,
+                "auth_type": "supabase"
+            }
     except Exception:
-        return None
+        pass
+
+    # 2. Try LiveKit
+    try:
+        from jose import jwt
+        payload = jwt.decode(token, settings.LIVEKIT_API_SECRET, algorithms=["HS256"])
+        identity = payload.get("sub")
+        if identity:
+            role = "candidate"
+            if str(identity).startswith("recruiter-"):
+                role = "recruiter"
+            return {
+                "id": identity,
+                "email": payload.get("name", "Anonymous"),
+                "full_name": payload.get("name"),
+                "role": role,
+                "auth_type": "livekit"
+            }
+    except Exception:
+        pass
+        
+    return None
+
 
 async def get_current_recruiter(
     current_user: dict = Depends(get_current_user)

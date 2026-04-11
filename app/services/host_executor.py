@@ -106,7 +106,7 @@ class HostExecutionService:
         ext_map = {
             "python": "main.py",
             "javascript": "main.js",
-            "typescript": "main.js", # Run ts as js for simplicity unless ts-node is mapped
+            "typescript": "main.ts",
             "java": "Main.java",
             "cpp": "main.cpp",
             "c": "main.c",
@@ -116,8 +116,13 @@ class HostExecutionService:
     def _get_execution_cmd(self, language: str, filepath: str, tmp_dir: str):
         if language == "python":
             return ["python", filepath]
-        elif language in ["javascript", "typescript"]:
+        elif language == "javascript":
             return ["node", filepath]
+        elif language == "typescript":
+            # On Windows, using npx.cmd is safer, but npx often resolves. 
+            # We use npx tsx to execute typescript without node complaining about syntax.
+            npx_cmd = "npx.cmd" if os.name == "nt" else "npx"
+            return [npx_cmd, "tsx", filepath]
         elif language == "c":
             out_exe = os.path.join(tmp_dir, "a.exe")
             return (["gcc", filepath, "-o", out_exe], [out_exe])

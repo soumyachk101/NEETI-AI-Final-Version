@@ -219,12 +219,19 @@ export const Landing = () => {
                 FAQ
               </Link>
               <Link
+                to="/join"
+                className="px-5 py-2 text-ink-secondary hover:text-ink-primary text-sm font-medium transition-colors"
+              >
+                Join Interview
+              </Link>
+              <Link
                 to="/login"
                 className="px-5 py-2 border border-neeti-border hover:border-primary/50 bg-neeti-elevated text-ink-primary text-sm font-medium rounded-md transition-all duration-200 hover:shadow-glow"
               >
                 Access System
               </Link>
             </div>
+
           </div>
         </header>
 
@@ -265,6 +272,11 @@ export const Landing = () => {
                     <Link to="/register">
                       <LiquidButton variant="white" className="border border-white/20" size={'xl'}>
                         Initiate Evaluation <ArrowRight className="w-4 h-4 ml-2" />
+                      </LiquidButton> 
+                    </Link>
+                    <Link to="/join">
+                      <LiquidButton variant="secondary" className="border border-white/10" size={'xl'}>
+                        Join Interview
                       </LiquidButton> 
                     </Link>
                 </div> 

@@ -18,6 +18,7 @@ import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
 import { Cookies } from './pages/Cookies';
 import { useAuthStore } from './store/useAuthStore';
+import { useSessionStore } from './store/useSessionStore';
 import { ToastProvider } from './components/Toast';
 import { Logo } from './components/Logo';
 import './index.css';
@@ -77,9 +78,8 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
 
 /**
  * CRIT-11 FIX: ProtectedRoute now shows a loading state while auth is being validated.
- * This prevents the flash-redirect where a user with a valid session briefly sees
- * a redirect to /login before their auth state is hydrated from localStorage/Supabase.
  */
+
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const isAuthenticated = useAuthStore(s => s.isAuthenticated);
   const isLoading = useAuthStore(s => s.isLoading);
@@ -89,6 +89,27 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   }
 
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+}
+
+/**
+ * FIX #15: SessionProtectedRoute allows candidates with a valid session state
+ * to access the interview room without needing a full account login.
+ */
+function SessionProtectedRoute({ children }: { children: ReactNode }) {
+  const isAuthenticated = useAuthStore(s => s.isAuthenticated);
+  const currentSession = useSessionStore(s => s.currentSession);
+  const isLoadingAuth = useAuthStore(s => s.isLoading);
+
+  if (isLoadingAuth) {
+    return <LoadingFallback />;
+  }
+
+  // Allow access if logged in OR if they have a valid session context
+  if (isAuthenticated || currentSession) {
+    return <>{children}</>;
+  }
+
+  return <Navigate to="/join" />;
 }
 
 function RecruiterRoute({ children }: { children: ReactNode }) {
@@ -104,6 +125,7 @@ function RecruiterRoute({ children }: { children: ReactNode }) {
   if (role !== 'recruiter') return <Navigate to="/dashboard" />;
   return <>{children}</>;
 }
+
 
 function NotFound() {
   return (
@@ -150,8 +172,9 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/join" element={<SessionJoin />} />
               <Route path="/sessions/join" element={<SessionJoin />} />
-              <Route path="/interview" element={<ProtectedRoute><InterviewRoom /></ProtectedRoute>} />
-              <Route path="/sessions/:id/interview" element={<ProtectedRoute><InterviewRoom /></ProtectedRoute>} />
+              <Route path="/interview" element={<SessionProtectedRoute><InterviewRoom /></SessionProtectedRoute>} />
+              <Route path="/sessions/:id/interview" element={<SessionProtectedRoute><InterviewRoom /></SessionProtectedRoute>} />
+
               <Route
                 path="/dashboard"
                 element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
@@ -170,7 +193,7 @@ function App() {
               />
               <Route
                 path="/sessions/:sessionId/results"
-                element={<ProtectedRoute><SessionResults /></ProtectedRoute>}
+                element={<SessionProtectedRoute><SessionResults /></SessionProtectedRoute>}
               />
               <Route
                 path="/evaluation/:id"

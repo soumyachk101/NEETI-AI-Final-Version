@@ -223,6 +223,70 @@ export const evaluationApi = {
   },
 };
 
+export interface PeripheralDeviceCreate {
+  device_id: string;
+  device_type: string;
+  device_name?: string;
+  manufacturer?: string;
+  model?: string;
+  capabilities?: Record<string, unknown>;
+  properties?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+export interface PeripheralDeviceResponse {
+  id: number;
+  session_id: number;
+  candidate_id?: number;
+  device_id: string;
+  device_type: string;
+  device_name?: string;
+  status: string;
+  is_active: boolean;
+}
+
+export interface DeviceEventCreate {
+  device_id: number;
+  event_type: string;
+  event_data?: Record<string, unknown>;
+  duration_ms?: number;
+  window_title?: string;
+  application?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export const devicesApi = {
+  registerDevice: async (
+    sessionId: number,
+    candidateId: number | undefined,
+    data: PeripheralDeviceCreate
+  ): Promise<PeripheralDeviceResponse> => {
+    const params = new URLSearchParams({ session_id: sessionId.toString() });
+    if (candidateId) params.append('candidate_id', candidateId.toString());
+    const response = await apiClient.post(`/api/devices/register?${params.toString()}`, data);
+    return response.data;
+  },
+
+  updateStatus: async (
+    deviceId: number,
+    candidateId: number | undefined,
+    status: string
+  ): Promise<PeripheralDeviceResponse> => {
+    const params = new URLSearchParams({ status });
+    if (candidateId) params.append('candidate_id', candidateId.toString());
+    const response = await apiClient.patch(`/api/devices/${deviceId}/status?${params.toString()}`);
+    return response.data;
+  },
+
+  trackEvent: async (
+    sessionId: number,
+    data: DeviceEventCreate
+  ): Promise<void> => {
+    const params = new URLSearchParams({ session_id: sessionId.toString() });
+    await apiClient.post(`/api/devices/events?${params.toString()}`, data);
+  },
+};
+
 export default apiClient;
 
 // Synced for GitHub timestamp
