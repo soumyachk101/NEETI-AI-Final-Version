@@ -200,7 +200,6 @@ export const Register: React.FC = () => {
                 <Input
                   label="Full Name"
                   type="text"
-                  placeholder="John Doe"
                   value={formData.full_name}
                   onChange={(e) => set('full_name', e.target.value)}
                   icon={<User className="w-4 h-4 text-white/40" />}
@@ -210,7 +209,6 @@ export const Register: React.FC = () => {
                 <Input
                   label="Email Address"
                   type="email"
-                  placeholder="you@company.com"
                   value={formData.email}
                   onChange={(e) => set('email', e.target.value)}
                   required
@@ -223,7 +221,6 @@ export const Register: React.FC = () => {
                   <Input
                     label="Password"
                     type="password"
-                    placeholder="Minimum 8 characters"
                     value={formData.password}
                     onChange={(e) => set('password', e.target.value)}
                     icon={<Lock className="w-4 h-4 text-white/40" />}
@@ -250,7 +247,6 @@ export const Register: React.FC = () => {
                 <Input
                   label="Confirm Password"
                   type="password"
-                  placeholder="Re-enter password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   icon={<Lock className="w-4 h-4 text-white/40" />}

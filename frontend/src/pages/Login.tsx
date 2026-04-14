@@ -132,7 +132,6 @@ export function Login() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your.email@company.com"
                   icon={<User className="w-4 h-4 text-white/40" />}
                   required
                   variant="skeuomorphic"
@@ -145,7 +144,6 @@ export function Login() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
                   icon={<Lock className="w-4 h-4 text-white/40" />}
                   required
                   variant="skeuomorphic"
