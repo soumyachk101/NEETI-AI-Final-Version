@@ -94,6 +94,7 @@ async def init_db() -> None:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         logger.info("Database initialized")
+    except Exception as e:
         logger.error(f"Database initialization failed (app will start degraded): {e}")
         logger.error(
             "CRITICAL HINT: If you see 'Network is unreachable', you are likely using the "
