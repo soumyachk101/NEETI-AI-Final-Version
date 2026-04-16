@@ -15,7 +15,11 @@ This guide contains the "proper" process to deploy Neeti AI to production using 
 ### A. Database (Supabase)
 1. Create a new project on Supabase.
 2. Go to `Project Settings` > `Database`.
-3. Copy the **URI** connection string (looks like `postgresql://postgres:[PASSWORD]@db.[ID].supabase.co:5432/postgres`).
+3. Locate the **Connection Pooler** section.
+4. Select **Transaction** mode and **IPv4**.
+5. Copy the **URI** connection string (it should use port **6543**, e.g., `postgresql://postgres.[ID]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres`).
+   > [!IMPORTANT]
+   > Do NOT use the Direct Connection (Port 5432) value in Railway, as it uses IPv6 and will cause "Network is unreachable" errors.
 
 ### B. Redis (Railway)
 1. Log in to Railway and create a new project.

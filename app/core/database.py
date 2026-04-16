@@ -94,12 +94,15 @@ async def init_db() -> None:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         logger.info("Database initialized")
-    except Exception as e:
         logger.error(f"Database initialization failed (app will start degraded): {e}")
         logger.error(
-            "Hint: Set DATABASE_URL to your Supabase *direct* connection string "
-            "(Session mode, port 5432). Pooler / Transaction mode often causes "
-            "'Tenant or user not found' errors with asyncpg."
+            "CRITICAL HINT: If you see 'Network is unreachable', you are likely using the "
+            "Supabase DIRECT URI (Port 5432) which uses IPv6. Railway requires the "
+            "Supabase CONNECTION POOLER URI (Port 6543) for IPv4 compatibility."
+        )
+        logger.error(
+            "Hint: Set DATABASE_URL to your Supabase *Pooler* connection string "
+            "(Transaction mode, port 6543). Direct connection often fails in cloud environments."
         )
 
 async def close_db() -> None:
